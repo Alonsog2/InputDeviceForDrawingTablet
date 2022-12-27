@@ -22,15 +22,15 @@ char key;
 
 char acciones1[ROWS * COLS] = {               // primera tecla envíada al recibir una pulsación del teclado 4x4
   'q',  't',  KEY_LEFT_CTRL,  ' ',
-  's',  'r',  ' ',  ' ',
-  KEY_LEFT_SHIFT,  'N',  ' ',  KEY_TAB,
-  ' ',  KEY_LEFT_CTRL,  KEY_LEFT_ALT,  KEY_LEFT_CTRL
+  's',  'r',  KEY_BACKSPACE,  KEY_LEFT_SHIFT,
+  'x',  'N',  'v',  KEY_TAB,
+  KEY_DELETE,  KEY_LEFT_CTRL,  KEY_LEFT_ALT,  KEY_LEFT_CTRL
 };
 
 char acciones2[ROWS * COLS] = {              // si el valor es distinto de 0, segunda pulsación enviada 
   0,  0,  'd',  0,
-  0,  0,  0,  0,
-  '7',  0,  0,  KEY_LEFT_SHIFT,
+  0,  0,  0, KEY_BACKSPACE,
+  0,  0,  0,  KEY_LEFT_SHIFT,
   0,  'z', 'z',  0
 };
 
@@ -55,7 +55,7 @@ Encoder myEnc2(1,15);
 #define INX_ENCODER_DOWN 1
 
 char acciones1Encoders[N_ENCODERS][2] = {       // primera tecla envíada por cada encoder (indice[n][INX_ENCODER_UP]=UP o indice [n][INX_ENCODER_DOWN]=DOWN)
-  {'6',  '4'}, // Rotation
+  {'4',  '6'}, // Rotation
   {223,  222}, // 223=+ 222=-  Zoom
   {'9',  '7'}  // Brush size
 };
