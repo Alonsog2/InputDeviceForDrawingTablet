@@ -161,7 +161,7 @@ void loop() {
     if (acciones2Encoder_Buttons[0] != 0) {                    // si la segunda acción es distinta de 0, la envía
       Keyboard.press(acciones2Encoder_Buttons[0]);
     }
-    Keyboard.releaseAll();
+    //Keyboard.releaseAll();
   }
   
   if(encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {     // 0= no hacer nada tras la primera pulsación
@@ -170,7 +170,7 @@ void loop() {
     if (acciones2Encoder_Buttons[0] != 1) {                    // si la segunda acción es distinta de 0, la envía
       Keyboard.press(acciones2Encoder_Buttons[1]);
     }
-    Keyboard.releaseAll();    
+    //Keyboard.releaseAll();    
   }
   
   if(encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {     // 0= no hacer nada tras la primera pulsación
@@ -179,12 +179,15 @@ void loop() {
     if (acciones2Encoder_Buttons[2] != 0) {                    // si la segunda acción es distinta de 0, la envía
       Keyboard.press(acciones2Encoder_Buttons[2]);
     }
-    Keyboard.releaseAll();    
+    //Keyboard.releaseAll();   
   }
-  //
-    
-  //delay(5);
+  
+  // comprobar si se ha soltado algún pulsador
+  if(encoder_buttons.onRelease(ENCODER0_BUTTON) || encoder_buttons.onRelease(ENCODER1_BUTTON) || encoder_buttons.onRelease(ENCODER2_BUTTON)) {
+    Keyboard.releaseAll();
+  }
 }
+    
 
 
 
