@@ -1,12 +1,16 @@
+/* This project as been made by Jose Ignacio Alonso
+ *  
+ */
 
-///////////////////////////////////////////////////////////////////////////////    TECLADO 4X4   ///////////////////////////////////////////////////////
 
-#include <Keyboard.h>               // librería para el teclado USB hacia ordenador       
+///////////////////////////////////////////////////////////////////////////////   4X4 keyboard   ///////////////////////////////////////////////////////
 
-#include <Keypad.h>                 // librería para el control de teclado físico 4x4
+#include <Keyboard.h>               // library for USB communication
+
+#include <Keypad.h>                 // library for controlling 4x4 keys
 const byte ROWS = 4; // rows
 const byte COLS = 4; // columns
-char keys[ROWS][COLS] = {           // los caracteres a partir del 9 son la continuación de la tabla ASCII para facilitar la indexación (de 0 a 15)
+char keys[ROWS][COLS] = {           // characters behind number 9 are the next in the ASCII secuence, just to make easier the indexation (from 0 to 15)
   {'0', '1', '2', '3'},
   {'4', '5', '6', '7'},
   {'8', '9', ':', ';'},
@@ -20,28 +24,14 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 char key;
 
-//char acciones1[ROWS * COLS] = {               // primera tecla envíada al recibir una pulsación del teclado 4x4
-//  'q',  't',  KEY_LEFT_CTRL,  ' ',
-//  's',  'r',  KEY_BACKSPACE,  KEY_LEFT_SHIFT,
-//  'x',  'N',  'v',  KEY_TAB,
-//  KEY_DELETE,  KEY_LEFT_CTRL,  KEY_LEFT_ALT,  KEY_LEFT_CTRL
-//};
-//
-//char acciones2[ROWS * COLS] = {              // si el valor es distinto de 0, segunda pulsación enviada 
-//  0,  0,  'd',  0,
-//  0,  0,  0, KEY_BACKSPACE,
-//  0,  0,  0,  KEY_LEFT_SHIFT,
-//  0,  'z', 'z',  0
-//};
-
-char acciones1[ROWS * COLS] = {               // primera tecla envíada al recibir una pulsación del teclado 4x4
+char actions1[ROWS * COLS] = {               // code sent when a key is pressed
   KEY_DELETE,  'q', 't',  KEY_LEFT_CTRL,
   KEY_TAB, 's',  'r',  KEY_BACKSPACE,
   KEY_LEFT_SHIFT,  'N',  'x',  'v',
   KEY_LEFT_CTRL,  KEY_LEFT_CTRL,  KEY_LEFT_ALT,  ' '
 };
 
-char acciones2[ROWS * COLS] = {              // si el valor es distinto de 0, segunda pulsación enviada 
+char actions2[ROWS * COLS] = {              // second code to send, if needed (the value is other than 0), when a key is pressed. For example KEY_LEFT_CTRL + 'z'
   0,  0,  0, 'd',
   0,  0,  0,  0,
   0,  0,  0,  0,
@@ -66,20 +56,20 @@ Encoder myEnc2(1,15);
 #define INX_ENCODER_UP 0
 #define INX_ENCODER_DOWN 1
 
-char acciones1Encoders[N_ENCODERS][2] = {       // primera tecla envíada por cada encoder (indice[n][INX_ENCODER_UP]=UP o indice [n][INX_ENCODER_DOWN]=DOWN)
-  {'4',  '6'}, // Rotation
-  {222,  223}, // 223=+ 222=-  Zoom
-  {'7',  '9'}  // Brush size
+char actions1Encoders[N_ENCODERS][2] = {       // Codes sent by the encoders (index [n][INX_ENCODER_UP]=UP or index [n][INX_ENCODER_DOWN]=DOWN)
+  {'4',  '6'},                                 // Rotation
+  {222,  223},                                 // 223=+ 222=-  Zoom
+  {'7',  '9'}                                  // Brush size (not standard krita shortcut. Must be assigned in krita too)
 };
 
-char acciones2Encoders[N_ENCODERS][2] = {       // si el valor es distinto de 0, segunda tecla envíada por cada encoder (indice[n][INX_ENCODER_UP]=UP o indice [n][INX_ENCODER_DOWN]=DOWN)
+char actions2Encoders[N_ENCODERS][2] = {       // second code to send, if needed (the value is other than 0)
   {0,  0},
   {0,  0}, 
   {0,  0}
 };
 
 
-//////////////////////////////////////////////////////////////////////   TECLADO ANALOGICO (3 TECLAS EN UNA ENTRADA ANALÓGICA)  ////////////////////////
+//////////////////////////////////////////////////////////////////////   Analog button (3 keys readed in only one analogic input)  ////////////////////////
 
 #include <AnalogMultiButton.h>
 
@@ -103,13 +93,13 @@ const int ENCODER2_BUTTON = 2;
 // make an AnalogMultiButton object, pass in the pin, total and values array
 AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TOTAL, ENCODER_BUTTONS_VALUES);
 
-char acciones1Encoder_Buttons[N_ENCODERS] = {       // primera tecla envíada por cada encoder_button
-  '5',   // Rotación 0
-  '2',   // Zoom pantalla
-  'e'    // Borrador
+char actions1Encoder_Buttons[N_ENCODERS] = {       // primera tecla envíada por cada encoder_button
+  '5',   // Reset rotation
+  '2',   // Reset zoom (fit to page)
+  'e'    // Toggle eraser mode
 };
 
-char acciones2Encoder_Buttons[N_ENCODERS] = {       // si el valor es distinto de 0, segunda tecla envíada por cada encoder_button
+char actions2Encoder_Buttons[N_ENCODERS] = {       // si el valor es distinto de 0, segunda tecla envíada por cada encoder_button
   0,
   0,
   0
@@ -120,9 +110,9 @@ char acciones2Encoder_Buttons[N_ENCODERS] = {       // si el valor es distinto d
 /////////////////////////////////////////////////////// setup //////////////////////////////////////////////////////////////
 void setup() {
   Serial.begin(115200);
-  Serial.println("Iniciado.");
+  Serial.println("Startin...");
 
-  //apagar los leds del puerto serie definiéndolos como entradas
+  //Switch off the serial port leds
   pinMode(LED_BUILTIN_TX, INPUT);
   pinMode(LED_BUILTIN_RX, INPUT);
 
@@ -138,63 +128,59 @@ void setup() {
 /////////////////////////////////////////////////////// loop //////////////////////////////////////////////////////////////
 
 void loop() {
-  // rastrea el teclado; si hay pulsaciones las tratará la función 'keypadEvent' 
+  // check the keyboard; if any key has changed, it will be proccesed by the 'keypadEvent' function
   key = keypad.getKey();                   
   //
   
-  // lee los encoders 
+  // check the encoders 
   long newPositionEncoder;              
 
   for (int nEncoder=0; nEncoder < N_ENCODERS ; nEncoder++) {
-    //boolean hayCambioEnEncoder = false;
-    int indiceUpDown = -1;
+    int indexUpDown = -1;
     
-    newPositionEncoder = leerEncoderN(nEncoder);
-    if (newPositionEncoder > 1) indiceUpDown=INX_ENCODER_UP;
-    if (newPositionEncoder < -1) indiceUpDown=INX_ENCODER_DOWN;
-    if (indiceUpDown != -1) {
-        Keyboard.press(acciones1Encoders[nEncoder][indiceUpDown]);
-        if (acciones2Encoders[nEncoder][indiceUpDown] != 0) {                    // si la segunda acción es distinta de 0, la envía
-          Keyboard.press(acciones2Encoders[nEncoder][indiceUpDown] );
+    newPositionEncoder = chekEncoderN(nEncoder);
+    if (newPositionEncoder > 1) indexUpDown=INX_ENCODER_UP;
+    if (newPositionEncoder < -1) indexUpDown=INX_ENCODER_DOWN;
+    if (indexUpDown != -1) {
+        Keyboard.press(actions1Encoders[nEncoder][indexUpDown]);
+        if (actions2Encoders[nEncoder][indexUpDown] != 0) {                    // if the value is other than 0, send it
+          Keyboard.press(actions2Encoders[nEncoder][indexUpDown] );
         }
-        resetearEncoderN(nEncoder);
+        resetEncoderN(nEncoder);
         Keyboard.releaseAll();
     }
   }
   //
   
 
-  // leer los botones de los encoders  ////////////////////////////////////////////////////////////////////////////////////////
+  // check encoder-buttons  ////////////////////////////////////////////////////////////////////////////////////////
   encoder_buttons.update();                                     
   
-  if(encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {     // 0= no hacer nada tras la primera pulsación
-    Serial.println("btn0");
-    Keyboard.press(acciones1Encoder_Buttons[0]);
-    if (acciones2Encoder_Buttons[0] != 0) {                    // si la segunda acción es distinta de 0, la envía
-      Keyboard.press(acciones2Encoder_Buttons[0]);
+  if(encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {    // 0= Detect only the first pressing
+    Keyboard.press(actions1Encoder_Buttons[0]);
+    if (actions2Encoder_Buttons[0] != 0) {                     // if the value is other than 0, send it
+      Keyboard.press(actions2Encoder_Buttons[0]);
     }
-    //Keyboard.releaseAll();
   }
   
-  if(encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {     // 0= no hacer nada tras la primera pulsación
+  if(encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {    
     Serial.println("btn1");
-    Keyboard.press(acciones1Encoder_Buttons[1]);
-    if (acciones2Encoder_Buttons[0] != 1) {                    // si la segunda acción es distinta de 0, la envía
-      Keyboard.press(acciones2Encoder_Buttons[1]);
+    Keyboard.press(actions1Encoder_Buttons[1]);
+    if (actions2Encoder_Buttons[0] != 1) {                    
+      Keyboard.press(actions2Encoder_Buttons[1]);
     }
-    //Keyboard.releaseAll();    
   }
   
-  if(encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {     // 0= no hacer nada tras la primera pulsación
+  if(encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {     
     Serial.println("btn2");
-    Keyboard.press(acciones1Encoder_Buttons[2]);
-    if (acciones2Encoder_Buttons[2] != 0) {                    // si la segunda acción es distinta de 0, la envía
-      Keyboard.press(acciones2Encoder_Buttons[2]);
+    Keyboard.press(actions1Encoder_Buttons[2]);
+    if (actions2Encoder_Buttons[2] != 0) {                    
+      Keyboard.press(actions2Encoder_Buttons[2]);
     }
-    //Keyboard.releaseAll();   
+ 
   }
   
-  // comprobar si se ha soltado algún pulsador
+  // check if some encoder_button has been depressed
   if(encoder_buttons.onRelease(ENCODER0_BUTTON) || encoder_buttons.onRelease(ENCODER1_BUTTON) || encoder_buttons.onRelease(ENCODER2_BUTTON)) {
     Keyboard.releaseAll();
   }
@@ -203,30 +189,30 @@ void loop() {
 
 
 
-/////////////////////////////////////////////////////// funciones //////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////// other functions //////////////////////////////////////////////////////////////
 
 void keypadEvent(KeypadEvent key) {
-  int indiceTecla = key - char('0');   // obtiene el índice de la pulsación en la matriz (de 0 a 15)
+  int keyIndex = key - char('0');   // get the index from 0 to 15)
 
-//  //para debug
-//  String cad = "Evento teclado " + String(key);
+//  //just for debug
+//  String cad = "Key Event " + String(key);
 //  Serial.println(cad);
-//  Serial.println(indiceTecla);
+//  Serial.println(keyIndex);
 //  //
 
   switch (keypad.getState()) {
     case PRESSED:
       //Serial.println(String("Accion1 " + String(key)));
-      Keyboard.press(acciones1[indiceTecla]);               // envía la primera acción correspondientea a la tecla pulsada
-      if (acciones2[indiceTecla] != 0) {                    // si la segunda acción es distinta de 0, la envía
+      Keyboard.press(actions1[keyIndex]);               // send the first action for the corresponding key
+      if (actions2[keyIndex] != 0) {                    // send the second value if is not 0
         //Serial.println(String("Accion2 "  + String(key)));
-        Keyboard.press(acciones2[indiceTecla]);
+        Keyboard.press(actions2[keyIndex]);
       }
       break;
 
     case RELEASED:
       //Serial.println("Released " + String(key));
-      Keyboard.releaseAll();                                // envía la liberación de cualquier pulsación que hubiera
+      Keyboard.releaseAll();                               
       break;
 
     // case HOLD:
@@ -240,7 +226,7 @@ void keypadEvent(KeypadEvent key) {
 
 
 
-long leerEncoderN(int nEncoder) {
+long chekEncoderN(int nEncoder) {
   switch (nEncoder) {
   case 0:
          return myEnc0.read();
@@ -257,7 +243,7 @@ long leerEncoderN(int nEncoder) {
 
 
 
-void resetearEncoderN(int nEncoder) {
+void resetEncoderN(int nEncoder) {
   switch (nEncoder) {
     case 0:
            myEnc0.write(0);
