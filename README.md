@@ -1,6 +1,6 @@
 # Input device for drawing tablet
 
-![Img1](/DOC/Img1.jpg)
+![Image 1](/DOC/Img1.JPG)
 
 This DIY device is recognized by any computer as a USB keyboard. Nor specific driver, neither other software is needed.
 Inside, there is only an Arduino Pro Micro, a 4x4 keyboard matrix and 3 rotary encoders.
