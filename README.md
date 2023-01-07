@@ -6,7 +6,7 @@ Inside, there is only an Arduino Pro Micro, a 4x4 keyboard matrix and 3 rotary e
 I use it with Krita but can be programmed with any key code combination, so it can work with any other drawing software.
 The 16 keys and the 3 knobs/push buttons can send any combination of key codes.
 The preprogrammed key codes can be modified easily, depending on your preferences, changing the corresponding program lines.
-My personal choice is this:
+
 ![Key code settings](/DOC/KeySettings.jpg)
 
 I have programmed the first knob for "rotate canvas" function (and reset the rotation if you press the knob)
