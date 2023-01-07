@@ -129,8 +129,39 @@ void setup() {
 
 void loop() {
   // check the keyboard; if any key has changed, it will be proccesed by the 'keypadEvent' function
-  key = keypad.getKey();                   
-  //
+  //key = keypad.getKey();                   
+  String msg;
+  int keyIndex;
+  // Fills kpd.key[ ] array with up-to 10 active keys. Returns true if there are ANY active keys.
+  if (keypad.getKeys()) {
+    for (int i=0; i<LIST_MAX; i++) {                            // Scan the whole key list.
+      if ( keypad.key[i].stateChanged ) {                       // Only find keys that have changed state.
+          keyIndex = keypad.key[i].kchar - char('0');           // get the index from 0 to 15
+          switch (keypad.key[i].kstate) {                       // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
+            case PRESSED:
+              msg = " PRESSED.";
+              Keyboard.press(actions1[keyIndex]);               // send the first action for the corresponding key
+              if (actions2[keyIndex] != 0) {                    // send the second value if not 0
+                Keyboard.press(actions2[keyIndex]);
+              }
+              break;
+            case HOLD:
+              msg = " HOLD.";
+              break;
+            case RELEASED:
+              msg = " RELEASED.";
+              Keyboard.releaseAll();                               
+              break;
+            case IDLE:
+              msg = " IDLE.";
+          }
+          Serial.print("Key ");
+          Serial.print(keypad.key[i].kchar);
+          Serial.println(msg);
+      }
+    }
+  }
+  
   
   // check the encoders 
   long newPositionEncoder;              
@@ -184,6 +215,9 @@ void loop() {
   if(encoder_buttons.onRelease(ENCODER0_BUTTON) || encoder_buttons.onRelease(ENCODER1_BUTTON) || encoder_buttons.onRelease(ENCODER2_BUTTON)) {
     Keyboard.releaseAll();
   }
+  //
+
+  
 }
     
 
@@ -192,6 +226,7 @@ void loop() {
 /////////////////////////////////////////////////////// other functions //////////////////////////////////////////////////////////////
 
 void keypadEvent(KeypadEvent key) {
+ return; 
   int keyIndex = key - char('0');   // get the index from 0 to 15)
 
 //  //just for debug
@@ -256,3 +291,42 @@ void resetEncoderN(int nEncoder) {
            break;
   }
 }
+
+
+//void loop() {
+//    loopCount++;
+//    if ( (millis()-startTime)>5000 ) {
+//        Serial.print("Average loops per second = ");
+//        Serial.println(loopCount/5);
+//        startTime = millis();
+//        loopCount = 0;
+//    }
+//
+//    // Fills kpd.key[ ] array with up-to 10 active keys.
+//    // Returns true if there are ANY active keys.
+//    if (kpd.getKeys())
+//    {
+//        for (int i=0; i<LIST_MAX; i++)   // Scan the whole key list.
+//        {
+//            if ( kpd.key[i].stateChanged )   // Only find keys that have changed state.
+//            {
+//                switch (kpd.key[i].kstate) {  // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
+//                    case PRESSED:
+//                    msg = " PRESSED.";
+//                break;
+//                    case HOLD:
+//                    msg = " HOLD.";
+//                break;
+//                    case RELEASED:
+//                    msg = " RELEASED.";
+//                break;
+//                    case IDLE:
+//                    msg = " IDLE.";
+//                }
+//                Serial.print("Key ");
+//                Serial.print(kpd.key[i].kchar);
+//                Serial.println(msg);
+//            }
+//        }
+//    }
+//}  // End loop
