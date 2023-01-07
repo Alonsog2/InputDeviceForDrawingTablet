@@ -17,3 +17,6 @@ The third knob is for resizing the brush. In this case, pushing the knob toggle 
 The 4x4 keyboard has been programmed according to the image. In some cases, the shortcuts in my Krita setup are not the standard ones, so pay attention to this.
 
 For more information, schematic, etc. see the files in the DOC folder.
+
+
+[Music](https://youtu.be/hWSeGyz9Vn8)
