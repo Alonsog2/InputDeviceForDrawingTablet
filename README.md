@@ -14,4 +14,4 @@ The second knob is assigned for zooming (and reset the zoom to "fit page" pressi
 The third knob is for resizing the brush. In this case, pushing the knob toggle the 'erase mode' of the brush.
 The 4x4 keyboard has been programmed according to the image. In some cases, the shortcuts in my Krita setup are not the standard ones, so pay attention to this.
 
-For more information, see the files in the DOC folder.
+For more information, schematic, etc. see the files in the DOC folder.
