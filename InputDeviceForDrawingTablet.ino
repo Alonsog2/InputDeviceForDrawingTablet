@@ -93,13 +93,13 @@ const int ENCODER2_BUTTON = 2;
 // make an AnalogMultiButton object, pass in the pin, total and values array
 AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TOTAL, ENCODER_BUTTONS_VALUES);
 
-char actions1Encoder_Buttons[N_ENCODERS] = {       // primera tecla envíada por cada encoder_button
+char actions1Encoder_Buttons[N_ENCODERS] = {       // First key send for each encoder_button
   '5',   // Reset rotation
   '2',   // Reset zoom (fit to page)
   'e'    // Toggle eraser mode
 };
 
-char actions2Encoder_Buttons[N_ENCODERS] = {       // si el valor es distinto de 0, segunda tecla envíada por cada encoder_button
+char actions2Encoder_Buttons[N_ENCODERS] = {       // if other than 0, second key send for each encoder_button
   0,
   0,
   0
@@ -151,7 +151,7 @@ void loop() {
             case RELEASED:
               msg = " RELEASED.";
               //Keyboard.releaseAll();                               
-              if (actions2[keyIndex] != 0) {                    // invert the order chen releasing the keys, send actions2 first (if needed)
+              if (actions2[keyIndex] != 0) {                    // invert the order when releasing the keys, send actions2 first (if needed)
                 Keyboard.release(actions2[keyIndex]);           
               }
               Keyboard.release(actions1[keyIndex]);             // and then actions1        
