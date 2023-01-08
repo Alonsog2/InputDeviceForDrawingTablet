@@ -18,4 +18,4 @@ The 4x4 keyboard has been programmed according to the image. In some cases, the 
 
 For more information, schematic, etc. see the files in the DOC folder.
 
-You can see a video with an example of use: [Example in youtube](https://youtu.be/hWSeGyz9Vn8)
+You can see a video with an example of use: [Example in youtube](https://youtu.be/WGJYHXOumJs)
