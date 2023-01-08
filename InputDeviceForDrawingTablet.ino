@@ -150,14 +150,18 @@ void loop() {
               break;
             case RELEASED:
               msg = " RELEASED.";
-              Keyboard.releaseAll();                               
+              //Keyboard.releaseAll();                               
+              if (actions2[keyIndex] != 0) {                    // invert the order chen releasing the keys, send actions2 first (if needed)
+                Keyboard.release(actions2[keyIndex]);           
+              }
+              Keyboard.release(actions1[keyIndex]);             // and then actions1        
               break;
             case IDLE:
               msg = " IDLE.";
           }
-          Serial.print("Key ");
-          Serial.print(keypad.key[i].kchar);
-          Serial.println(msg);
+          //Serial.print("Key ");
+          //Serial.print(keypad.key[i].kchar);
+          //Serial.println(msg);
       }
     }
   }
@@ -291,42 +295,3 @@ void resetEncoderN(int nEncoder) {
            break;
   }
 }
-
-
-//void loop() {
-//    loopCount++;
-//    if ( (millis()-startTime)>5000 ) {
-//        Serial.print("Average loops per second = ");
-//        Serial.println(loopCount/5);
-//        startTime = millis();
-//        loopCount = 0;
-//    }
-//
-//    // Fills kpd.key[ ] array with up-to 10 active keys.
-//    // Returns true if there are ANY active keys.
-//    if (kpd.getKeys())
-//    {
-//        for (int i=0; i<LIST_MAX; i++)   // Scan the whole key list.
-//        {
-//            if ( kpd.key[i].stateChanged )   // Only find keys that have changed state.
-//            {
-//                switch (kpd.key[i].kstate) {  // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
-//                    case PRESSED:
-//                    msg = " PRESSED.";
-//                break;
-//                    case HOLD:
-//                    msg = " HOLD.";
-//                break;
-//                    case RELEASED:
-//                    msg = " RELEASED.";
-//                break;
-//                    case IDLE:
-//                    msg = " IDLE.";
-//                }
-//                Serial.print("Key ");
-//                Serial.print(kpd.key[i].kchar);
-//                Serial.println(msg);
-//            }
-//        }
-//    }
-//}  // End loop
