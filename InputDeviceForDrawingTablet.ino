@@ -1,5 +1,5 @@
 /* This project as been made by Jose Ignacio Alonso
- *  
+ * For more information, visit https://github.com/Alonsog2/InputDeviceForDrawingTablet 
  */
 
 
@@ -93,13 +93,13 @@ const int ENCODER2_BUTTON = 2;
 // make an AnalogMultiButton object, pass in the pin, total and values array
 AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TOTAL, ENCODER_BUTTONS_VALUES);
 
-char actions1Encoder_Buttons[N_ENCODERS] = {       // First key send for each encoder_button
+char actions1Encoder_Buttons[N_ENCODERS] = {       // First key sent for each encoder_button
   '5',   // Reset rotation
   '2',   // Reset zoom (fit to page)
   'e'    // Toggle eraser mode
 };
 
-char actions2Encoder_Buttons[N_ENCODERS] = {       // if other than 0, second key send for each encoder_button
+char actions2Encoder_Buttons[N_ENCODERS] = {       // if other than 0, second key sent for each encoder_button
   0,
   0,
   0
@@ -110,7 +110,7 @@ char actions2Encoder_Buttons[N_ENCODERS] = {       // if other than 0, second ke
 /////////////////////////////////////////////////////// setup //////////////////////////////////////////////////////////////
 void setup() {
   Serial.begin(115200);
-  Serial.println("Startin...");
+  Serial.println("Starting...");
 
   //Switch off the serial port leds
   pinMode(LED_BUILTIN_TX, INPUT);
