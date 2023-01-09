@@ -24,19 +24,14 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 char key;
 
-char actions1[ROWS * COLS] = {               // code sent when a key is pressed
-  KEY_DELETE,  'q', 't',  KEY_LEFT_CTRL,
-  KEY_TAB, 's',  'r',  KEY_BACKSPACE,
-  KEY_LEFT_SHIFT,  'N',  'x',  'v',
-  KEY_LEFT_CTRL,  KEY_LEFT_CTRL,  KEY_LEFT_ALT,  ' '
+char actions[ROWS * COLS][2] = {  // code sent when a key is pressed. if second value is other than 0 send it
+  {KEY_DELETE, 0},     {'q', 0},             {'t', 0},          {KEY_LEFT_CTRL, 'd'},
+  {KEY_TAB, 0},        {'s', 0},             {'r', 0},          {KEY_BACKSPACE, 0},
+  {KEY_LEFT_SHIFT, 0}, {'N', 0},             {'x', 0},          {'v', 0},
+  {KEY_LEFT_CTRL, 0},  {KEY_LEFT_CTRL, 'z'}, {KEY_LEFT_ALT, 0}, {' ',0}
 };
 
-char actions2[ROWS * COLS] = {              // second code to send, if needed (the value is other than 0), when a key is pressed. For example KEY_LEFT_CTRL + 'z'
-  0,  0,  0, 'd',
-  0,  0,  0,  0,
-  0,  0,  0,  0,
-  0,  'z', 0,  0
-};
+
 
 //////////////////////////////////////////////////////////////////////  ROTARY ENCODERS  ///////////////////////////////////////////////////////////////
 
@@ -69,6 +64,7 @@ char actions2Encoders[N_ENCODERS][2] = {       // second code to send, if needed
 };
 
 
+
 //////////////////////////////////////////////////////////////////////   Analog button (3 keys readed in only one analogic input)  ////////////////////////
 
 #include <AnalogMultiButton.h>
@@ -93,16 +89,10 @@ const int ENCODER2_BUTTON = 2;
 // make an AnalogMultiButton object, pass in the pin, total and values array
 AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TOTAL, ENCODER_BUTTONS_VALUES);
 
-char actions1Encoder_Buttons[N_ENCODERS] = {       // First key sent for each encoder_button
-  '5',   // Reset rotation
-  '2',   // Reset zoom (fit to page)
-  'e'    // Toggle eraser mode
-};
-
-char actions2Encoder_Buttons[N_ENCODERS] = {       // if other than 0, second key sent for each encoder_button
-  0,
-  0,
-  0
+char actionsEncoder_Buttons[N_ENCODERS][2] = {       // First key sent for each encoder_button. if other than 0, second key sent for each encoder_button
+  {'5', 0},   // Reset rotation
+  {'2', 0},   // Reset zoom (fit to page)
+  {'e', 0}    // Toggle eraser mode
 };
 
 
@@ -117,7 +107,6 @@ void setup() {
   pinMode(LED_BUILTIN_RX, INPUT);
 
   keypad.setDebounceTime(50);
-  keypad.addEventListener(keypadEvent); // Add an event listener for this keypad
 
   Keyboard.begin();
 }
@@ -128,8 +117,6 @@ void setup() {
 /////////////////////////////////////////////////////// loop //////////////////////////////////////////////////////////////
 
 void loop() {
-  // check the keyboard; if any key has changed, it will be proccesed by the 'keypadEvent' function
-  //key = keypad.getKey();                   
   String msg;
   int keyIndex;
   // Fills kpd.key[ ] array with up-to 10 active keys. Returns true if there are ANY active keys.
@@ -140,9 +127,9 @@ void loop() {
           switch (keypad.key[i].kstate) {                       // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
             case PRESSED:
               msg = " PRESSED.";
-              Keyboard.press(actions1[keyIndex]);               // send the first action for the corresponding key
-              if (actions2[keyIndex] != 0) {                    // send the second value if not 0
-                Keyboard.press(actions2[keyIndex]);
+              Keyboard.press(actions[keyIndex][0]);               // send the first action for the corresponding key
+              if (actions[keyIndex][1] != 0) {                    // send the second value if not 0
+                Keyboard.press(actions[keyIndex][1]);
               }
               break;
             case HOLD:
@@ -150,11 +137,10 @@ void loop() {
               break;
             case RELEASED:
               msg = " RELEASED.";
-              //Keyboard.releaseAll();                               
-              if (actions2[keyIndex] != 0) {                    // invert the order when releasing the keys, send actions2 first (if needed)
-                Keyboard.release(actions2[keyIndex]);           
+              if (actions[keyIndex][1] != 0) {                  // invert the order when releasing the keys, send actions2 first (if needed)
+                Keyboard.release(actions[keyIndex][1]);           
               }
-              Keyboard.release(actions1[keyIndex]);             // and then actions1        
+              Keyboard.release(actions[keyIndex][0]);             // and then actions1        
               break;
             case IDLE:
               msg = " IDLE.";
@@ -192,25 +178,25 @@ void loop() {
   encoder_buttons.update();                                     
   
   if(encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {    // 0= Detect only the first pressing
-    Keyboard.press(actions1Encoder_Buttons[0]);
-    if (actions2Encoder_Buttons[0] != 0) {                     // if the value is other than 0, send it
-      Keyboard.press(actions2Encoder_Buttons[0]);
+    Keyboard.press(actionsEncoder_Buttons[0][0]);
+    if (actionsEncoder_Buttons[0][1] != 0) {                     // if the value is other than 0, send it
+      Keyboard.press(actionsEncoder_Buttons[0][1]);
     }
   }
   
   if(encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {    
     Serial.println("btn1");
-    Keyboard.press(actions1Encoder_Buttons[1]);
-    if (actions2Encoder_Buttons[0] != 1) {                    
-      Keyboard.press(actions2Encoder_Buttons[1]);
+    Keyboard.press(actionsEncoder_Buttons[1][0]);
+    if (actionsEncoder_Buttons[1][1] != 1) {                    
+      Keyboard.press(actionsEncoder_Buttons[1][1]);
     }
   }
   
   if(encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {     
     Serial.println("btn2");
-    Keyboard.press(actions1Encoder_Buttons[2]);
-    if (actions2Encoder_Buttons[2] != 0) {                    
-      Keyboard.press(actions2Encoder_Buttons[2]);
+    Keyboard.press(actionsEncoder_Buttons[2][0]);
+    if (actionsEncoder_Buttons[2][1] != 0) {                    
+      Keyboard.press(actionsEncoder_Buttons[2][1]);
     }
  
   }
@@ -229,39 +215,39 @@ void loop() {
 
 /////////////////////////////////////////////////////// other functions //////////////////////////////////////////////////////////////
 
-void keypadEvent(KeypadEvent key) {
- return; 
-  int keyIndex = key - char('0');   // get the index from 0 to 15)
-
-//  //just for debug
-//  String cad = "Key Event " + String(key);
-//  Serial.println(cad);
-//  Serial.println(keyIndex);
-//  //
-
-  switch (keypad.getState()) {
-    case PRESSED:
-      //Serial.println(String("Accion1 " + String(key)));
-      Keyboard.press(actions1[keyIndex]);               // send the first action for the corresponding key
-      if (actions2[keyIndex] != 0) {                    // send the second value if is not 0
-        //Serial.println(String("Accion2 "  + String(key)));
-        Keyboard.press(actions2[keyIndex]);
-      }
-      break;
-
-    case RELEASED:
-      //Serial.println("Released " + String(key));
-      Keyboard.releaseAll();                               
-      break;
-
-    // case HOLD:
-      //      //Serial.println("Hold " + String(key));
-      //      if (key == '+') {
-      //        // blablabla...
-      //      }
-      //      break;
-  }
-}
+//void keypadEvent(KeypadEvent key) {
+// return; 
+//  int keyIndex = key - char('0');   // get the index from 0 to 15)
+//
+////  //just for debug
+////  String cad = "Key Event " + String(key);
+////  Serial.println(cad);
+////  Serial.println(keyIndex);
+////  //
+//
+//  switch (keypad.getState()) {
+//    case PRESSED:
+//      //Serial.println(String("Accion1 " + String(key)));
+//      Keyboard.press(actions1[keyIndex]);               // send the first action for the corresponding key
+//      if (actions2[keyIndex] != 0) {                    // send the second value if is not 0
+//        //Serial.println(String("Accion2 "  + String(key)));
+//        Keyboard.press(actions2[keyIndex]);
+//      }
+//      break;
+//
+//    case RELEASED:
+//      //Serial.println("Released " + String(key));
+//      Keyboard.releaseAll();                               
+//      break;
+//
+//    // case HOLD:
+//      //      //Serial.println("Hold " + String(key));
+//      //      if (key == '+') {
+//      //        // blablabla...
+//      //      }
+//      //      break;
+//  }
+//}
 
 
 
