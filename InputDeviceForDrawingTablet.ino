@@ -17,21 +17,31 @@ char keys[ROWS][COLS] = {           // characters behind number 9 are the next i
   {'<', '=', '>', '?'}
 };
 
-byte rowPins[ROWS] = {7, 8, 9, 10}; //rows (outputs)
-byte colPins[COLS] = {3, 4, 5, 6}; //columns (inputs)
+byte rowPins[ROWS] = {7, 8, 9, 10}; //rows 
+byte colPins[COLS] = {3, 4, 5, 6};  //columns
 
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
-char key;
-
 char actions[ROWS * COLS][2] = {  // code sent when a key is pressed. if second value is other than 0 send it
-  {KEY_DELETE, 0},     {'q', 0},             {'t', 0},          {KEY_LEFT_CTRL, 'd'},
-  {KEY_TAB, 0},        {'s', 0},             {'r', 0},          {KEY_BACKSPACE, 0},
-  {KEY_LEFT_SHIFT, 0}, {'N', 0},             {'x', 0},          {'v', 0},
-  {KEY_LEFT_CTRL, 0},  {KEY_LEFT_CTRL, 'z'}, {KEY_LEFT_ALT, 0}, {' ',0}
+  {'q', 0},            {'t', 0},             {KEY_LEFT_CTRL, 'd'},{'|', 0},
+  {KEY_TAB, 0},        {'s', 0},             {'r', 0},            {KEY_BACKSPACE, 0},
+  {KEY_LEFT_SHIFT, 0}, {'N', 0},             {'z', 0},            {'v', 0},
+  {KEY_LEFT_CTRL, 0},  {KEY_LEFT_CTRL, 'z'}, {KEY_LEFT_ALT, 0},   {' ',0}
 };
 
+// Next actions are active when localShiftKey has been pressed, insted of the 'actions' array. 
+char actions_LocalShift[ROWS * COLS][2] = {  // code sent when a key is pressed. if second value is other than 0 send it
+  {'m',0},              {KEY_LEFT_CTRL, 't'}, {KEY_F3, 0},          {'|',0},
+  {KEY_LEFT_CTRL, 'a'}, {KEY_LEFT_CTRL, 'g'}, {KEY_LEFT_ALT, 'g'},  {0xB0, 'b'},
+  {'x', 0},             {KEY_LEFT_CTRL, 'b'}, {KEY_LEFT_CTRL, 'k'}, {KEY_LEFT_CTRL, 'l'},
+  {KEY_LEFT_CTRL, 'x'}, {KEY_LEFT_CTRL, 'c'}, {KEY_LEFT_CTRL, 'v'}, {KEY_LEFT_SHIFT, 'v'}
+};
 
+int index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
+boolean localShiftMomentary = false;         // determine if localShift (if active) has a momentary behaviour (or switch)
+
+char key;
+boolean isLocalShiftActive = false;
 
 //////////////////////////////////////////////////////////////////////  ROTARY ENCODERS  ///////////////////////////////////////////////////////////////
 
@@ -127,23 +137,41 @@ void loop() {
           switch (keypad.key[i].kstate) {                       // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
             case PRESSED:
               msg = " PRESSED.";
-              Keyboard.press(actions[keyIndex][0]);               // send the first action for the corresponding key
-              if (actions[keyIndex][1] != 0) {                    // send the second value if not 0
-                Keyboard.press(actions[keyIndex][1]);
+
+              if (keyIndex == index_LocalShiftKey) {
+                if (localShiftMomentary) {
+                  isLocalShiftActive = true;
+                }else{
+                  isLocalShiftActive = (! isLocalShiftActive);
+                }
+                Keyboard.releaseAll();                         // just in case some other previous key still pressed...
+                break;
               }
+              
+              sendKeyPressed( ( (isLocalShiftActive) ? actions_LocalShift : actions), keyIndex);
               break;
+              
             case HOLD:
               msg = " HOLD.";
               break;
+              
             case RELEASED:
               msg = " RELEASED.";
-              if (actions[keyIndex][1] != 0) {                  // invert the order when releasing the keys, send actions2 first (if needed)
-                Keyboard.release(actions[keyIndex][1]);           
+
+              if (keyIndex == index_LocalShiftKey) {
+                if (localShiftMomentary) {
+                  isLocalShiftActive = false;
+                  Keyboard.releaseAll();                        // just in case some other previous key still pressed...
+                }
+                break;
               }
-              Keyboard.release(actions[keyIndex][0]);             // and then actions1        
+              
+              sendKeyDepressed( ( (isLocalShiftActive) ? actions_LocalShift : actions), keyIndex);        
               break;
+              
             case IDLE:
               msg = " IDLE.";
+              break;
           }
           //Serial.print("Key ");
           //Serial.print(keypad.key[i].kchar);
@@ -215,39 +243,21 @@ void loop() {
 
 /////////////////////////////////////////////////////// other functions //////////////////////////////////////////////////////////////
 
-//void keypadEvent(KeypadEvent key) {
-// return; 
-//  int keyIndex = key - char('0');   // get the index from 0 to 15)
-//
-////  //just for debug
-////  String cad = "Key Event " + String(key);
-////  Serial.println(cad);
-////  Serial.println(keyIndex);
-////  //
-//
-//  switch (keypad.getState()) {
-//    case PRESSED:
-//      //Serial.println(String("Accion1 " + String(key)));
-//      Keyboard.press(actions1[keyIndex]);               // send the first action for the corresponding key
-//      if (actions2[keyIndex] != 0) {                    // send the second value if is not 0
-//        //Serial.println(String("Accion2 "  + String(key)));
-//        Keyboard.press(actions2[keyIndex]);
-//      }
-//      break;
-//
-//    case RELEASED:
-//      //Serial.println("Released " + String(key));
-//      Keyboard.releaseAll();                               
-//      break;
-//
-//    // case HOLD:
-//      //      //Serial.println("Hold " + String(key));
-//      //      if (key == '+') {
-//      //        // blablabla...
-//      //      }
-//      //      break;
-//  }
-//}
+void sendKeyPressed(char acts[ROWS * COLS][2], int keyIndex){
+   Keyboard.press(acts[keyIndex][0]);           // send the first action for the corresponding key
+  if (acts[keyIndex][1] != 0) {                 // send the second value if not 0
+    Keyboard.press(acts[keyIndex][1]);
+  }
+}
+
+
+
+void sendKeyDepressed(char acts[ROWS * COLS][2], int keyIndex){
+  if (acts[keyIndex][1] != 0) {                  // invert the order when releasing the keys, send actions2 first (if needed)
+    Keyboard.release(acts[keyIndex][1]);           
+  }
+  Keyboard.release(acts[keyIndex][0]);           // and then actions1  
+}
 
 
 
