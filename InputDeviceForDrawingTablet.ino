@@ -38,10 +38,20 @@ char actions_LocalShift[ROWS * COLS][2] = {  // code sent when a key is pressed.
 };
 
 int index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
-boolean localShiftMomentary = false;         // determine if localShift (if active) has a momentary behaviour (or switch)
+
+enum LOCAL_SHIFT_MODES {
+  NO_LOCAL_SHIFT = 0,                        
+  LOCAL_SHIFT_TEMP,                         // Pressing once localShift key. Then, after pressing any other key, the system automaticaly return to a NO_LOCAL_SHIFT mode 
+  LOCAL_SHIFT_LOCKED,                       // Pressing twice localShift key. Then the system is in localShift mode until localShift key is pressed again.
+};
 
 char key;
-boolean isLocalShiftActive = false;
+LOCAL_SHIFT_MODES localShiftMode = NO_LOCAL_SHIFT;
+
+#define pin_LED_LocalShift A2
+#define millis_LED_LocalShift 100
+long lastMillis_LED_LocalShift = 0;
+
 
 //////////////////////////////////////////////////////////////////////  ROTARY ENCODERS  ///////////////////////////////////////////////////////////////
 
@@ -116,6 +126,9 @@ void setup() {
   pinMode(LED_BUILTIN_TX, INPUT);
   pinMode(LED_BUILTIN_RX, INPUT);
 
+  pinMode(pin_LED_LocalShift, OUTPUT);                       // LED for localShift indication
+  refreshLEDLocalShift();
+  
   keypad.setDebounceTime(50);
 
   Keyboard.begin();
@@ -139,16 +152,24 @@ void loop() {
               msg = " PRESSED.";
 
               if (keyIndex == index_LocalShiftKey) {
-                if (localShiftMomentary) {
-                  isLocalShiftActive = true;
-                }else{
-                  isLocalShiftActive = (! isLocalShiftActive);
+                switch (localShiftMode){
+                  case NO_LOCAL_SHIFT:
+                    localShiftMode = LOCAL_SHIFT_TEMP;
+                    break;
+                  case LOCAL_SHIFT_TEMP:
+                    localShiftMode = LOCAL_SHIFT_LOCKED;
+                    lastMillis_LED_LocalShift = 0;
+                    break;
+                  case LOCAL_SHIFT_LOCKED:
+                    localShiftMode = NO_LOCAL_SHIFT;
+                    break;
                 }
                 Keyboard.releaseAll();                         // just in case some other previous key still pressed...
+                refreshLEDLocalShift();
                 break;
               }
               
-              sendKeyPressed( ( (isLocalShiftActive) ? actions_LocalShift : actions), keyIndex);
+              sendKeyPressed( ( (localShiftMode == NO_LOCAL_SHIFT) ? actions : actions_LocalShift), keyIndex);
               break;
               
             case HOLD:
@@ -159,14 +180,16 @@ void loop() {
               msg = " RELEASED.";
 
               if (keyIndex == index_LocalShiftKey) {
-                if (localShiftMomentary) {
-                  isLocalShiftActive = false;
-                  Keyboard.releaseAll();                        // just in case some other previous key still pressed...
-                }
+                Keyboard.releaseAll();                        // just in case some other previous key still pressed...
                 break;
               }
+              if (localShiftMode == LOCAL_SHIFT_TEMP) {
+                localShiftMode = NO_LOCAL_SHIFT;
+                Keyboard.releaseAll();
+                refreshLEDLocalShift();
+              }
               
-              sendKeyDepressed( ( (isLocalShiftActive) ? actions_LocalShift : actions), keyIndex);        
+              sendKeyDepressed( ( (localShiftMode) ? actions_LocalShift : actions), keyIndex);        
               break;
               
             case IDLE:
@@ -179,6 +202,7 @@ void loop() {
       }
     }
   }
+  refreshLEDLocalShift();
   
   
   // check the encoders 
@@ -290,4 +314,24 @@ void resetEncoderN(int nEncoder) {
            myEnc2.write(0);
            break;
   }
+}
+
+
+
+void refreshLEDLocalShift(){
+  static boolean prevStatusLedOn = false;
+  boolean newStatusLed;
+  
+  if (localShiftMode == LOCAL_SHIFT_TEMP) {                                // if LOCAL_SHIFT_TEMP mode, blink led
+    newStatusLed = prevStatusLedOn;
+    if (millis() > (lastMillis_LED_LocalShift + millis_LED_LocalShift) ) {
+      lastMillis_LED_LocalShift = millis();
+      newStatusLed = (! newStatusLed);
+    }
+  } else {
+    newStatusLed = ( (localShiftMode == NO_LOCAL_SHIFT) ? LOW : HIGH);     // other modes than LOCAL_SHIFT_TEMP
+  }
+
+  digitalWrite(pin_LED_LocalShift, newStatusLed);
+  prevStatusLedOn = newStatusLed;
 }
