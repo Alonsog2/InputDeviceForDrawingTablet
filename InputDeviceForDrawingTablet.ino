@@ -26,12 +26,12 @@ char actions[ROWS * COLS][2] = {  // code sent when a key is pressed. if second 
   {'q', 0},            {'t', 0},             {KEY_LEFT_CTRL, 'd'},{'|', 0},
   {KEY_TAB, 0},        {'s', 0},             {'r', 0},            {KEY_BACKSPACE, 0},
   {KEY_LEFT_SHIFT, 0}, {'N', 0},             {'z', 0},            {'v', 0},
-  {KEY_LEFT_CTRL, 0},  {KEY_LEFT_CTRL, 'z'}, {KEY_LEFT_ALT, 0},   {' ',0}
+  {KEY_LEFT_CTRL, 0},  {KEY_LEFT_CTRL, 'z'}, {'m', 0},   {' ',0}
 };
 
 // Next actions are active when localShiftKey has been pressed, insted of the 'actions' array. 
 char actions_LocalShift[ROWS * COLS][2] = {  // code sent when a key is pressed. if second value is other than 0 send it
-  {'m',0},              {KEY_LEFT_CTRL, 't'}, {KEY_F3, 0},          {'|',0},
+  {KEY_LEFT_CTRL, 't'}, {KEY_LEFT_CTRL, 'u'}, {KEY_F3, 0},          {'|',0},
   {KEY_LEFT_CTRL, 'a'}, {KEY_LEFT_CTRL, 'g'}, {KEY_LEFT_ALT, 'g'},  {0xB0, 'b'},
   {'x', 0},             {KEY_LEFT_CTRL, 'b'}, {KEY_LEFT_CTRL, 'k'}, {KEY_LEFT_CTRL, 'l'},
   {KEY_LEFT_CTRL, 'x'}, {KEY_LEFT_CTRL, 'c'}, {KEY_LEFT_CTRL, 'v'}, {KEY_LEFT_SHIFT, 'v'}
@@ -49,7 +49,7 @@ char key;
 LOCAL_SHIFT_MODES localShiftMode = NO_LOCAL_SHIFT;
 
 #define pin_LED_LocalShift A2
-#define millis_LED_LocalShift 100
+#define millis_LED_LocalShift 150
 long lastMillis_LED_LocalShift = 0;
 
 
@@ -149,7 +149,7 @@ void loop() {
           keyIndex = keypad.key[i].kchar - char('0');           // get the index from 0 to 15
           switch (keypad.key[i].kstate) {                       // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
             case PRESSED:
-              msg = " PRESSED.";
+              //msg = " PRESSED.";
 
               if (keyIndex == index_LocalShiftKey) {
                 switch (localShiftMode){
@@ -172,12 +172,12 @@ void loop() {
               sendKeyPressed( ( (localShiftMode == NO_LOCAL_SHIFT) ? actions : actions_LocalShift), keyIndex);
               break;
               
-            case HOLD:
-              msg = " HOLD.";
-              break;
+            //case HOLD:
+            //  msg = " HOLD.";
+            //  break;
               
             case RELEASED:
-              msg = " RELEASED.";
+              //msg = " RELEASED.";
 
               if (keyIndex == index_LocalShiftKey) {
                 Keyboard.releaseAll();                        // just in case some other previous key still pressed...
@@ -192,10 +192,11 @@ void loop() {
               sendKeyDepressed( ( (localShiftMode) ? actions_LocalShift : actions), keyIndex);        
               break;
               
-            case IDLE:
-              msg = " IDLE.";
-              break;
+            //case IDLE:
+            //  msg = " IDLE.";
+            //  break;
           }
+          
           //Serial.print("Key ");
           //Serial.print(keypad.key[i].kchar);
           //Serial.println(msg);
