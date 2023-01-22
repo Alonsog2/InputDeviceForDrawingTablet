@@ -310,20 +310,20 @@ void refreshLED_Status() {
   static int nPulseTest = 0; 
   boolean newStatusLed;
 
-  if (testMode) {                                                           // TestMode
+  if (testMode) {                                                               // TestMode
     newStatusLed = prevStatusLed;
     switch (nPulseTest) {
-      case 0:
+      case 0:                                                                   // NO_LOCAL_SHIFT status -> One short blink and a large pause
         if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
           lastMillis_LED_Status = millis();
           newStatusLed = false;  
           nPulseTest ++;
         }
         break;
-      case 1:
+      case 1:                                                       
         if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
           lastMillis_LED_Status = millis();
-          if (localShiftMode != NO_LOCAL_SHIFT) {
+          if (localShiftMode != NO_LOCAL_SHIFT) {                               // Other status than NO_LOCAL_SHIFT -> Two short blink and a large pause
             newStatusLed = true;
           }
           nPulseTest ++;  
@@ -344,9 +344,6 @@ void refreshLED_Status() {
         }
         break;       
     }
-
-
-
     
   } else {                                                                   // NO testMode (normal)
     if (localShiftMode == LOCAL_SHIFT_TEMP) {                                // if LOCAL_SHIFT_TEMP mode, blink led
