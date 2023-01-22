@@ -33,7 +33,7 @@ LOCAL_SHIFT_MODES localShiftMode = NO_LOCAL_SHIFT;
 
 #define pin_LED_Status A2
 #define millis_LED_LocalShift 150
-#define millis_LED_TestMode_High 100
+#define millis_LED_TestMode_High 50
 #define millis_LED_TestMode_Low 900
 long lastMillis_LED_Status = 0;
 
@@ -127,7 +127,7 @@ void loop() {
             if (keyIndex == index_LocalShiftKey) {
               switch (localShiftMode) {
                 case NO_LOCAL_SHIFT:
-                  localShiftMode = LOCAL_SHIFT_TEMP;
+                  localShiftMode = (testMode) ? LOCAL_SHIFT_LOCKED : LOCAL_SHIFT_TEMP;  // In testMode, always go to LOCAL_SHIFT_LOCKED (skiping LOCAL_SHIFT_TEMP) 
                   break;
                 case LOCAL_SHIFT_TEMP:
                   localShiftMode = LOCAL_SHIFT_LOCKED;
@@ -153,6 +153,7 @@ void loop() {
             //  msg = " HOLD.";
             if (keyIndex == index_LocalShiftKey) {           // Switch test mode
               Keyboard.releaseAll();                         // just in case some other previous key still pressed...
+              localShiftMode = NO_LOCAL_SHIFT;               // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
               testMode= !testMode;
               displayTestMode();
               refreshLED_Status();
@@ -306,17 +307,46 @@ void resetEncoderN(int nEncoder) {
 
 void refreshLED_Status() {
   static boolean prevStatusLed = false;
+  static int nPulseTest = 0; 
   boolean newStatusLed;
 
   if (testMode) {                                                           // TestMode
     newStatusLed = prevStatusLed;
-    if (prevStatusLed && (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) ) {
-      lastMillis_LED_Status = millis();
-      newStatusLed = false;
-    } else if ((! prevStatusLed) && (millis() > (lastMillis_LED_Status + millis_LED_TestMode_Low) ) ) {
-      lastMillis_LED_Status = millis();
-      newStatusLed = true;
+    switch (nPulseTest) {
+      case 0:
+        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+          lastMillis_LED_Status = millis();
+          newStatusLed = false;  
+          nPulseTest ++;
+        }
+        break;
+      case 1:
+        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+          lastMillis_LED_Status = millis();
+          if (localShiftMode != NO_LOCAL_SHIFT) {
+            newStatusLed = true;
+          }
+          nPulseTest ++;  
+        }
+        break;         
+      case 2:
+        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+          lastMillis_LED_Status = millis();
+          newStatusLed = false;  
+          nPulseTest ++;
+        }
+        break;   
+      case 3:
+        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_Low) ) {
+          lastMillis_LED_Status = millis();
+          newStatusLed = true; 
+          nPulseTest = 0; 
+        }
+        break;       
     }
+
+
+
     
   } else {                                                                   // NO testMode (normal)
     if (localShiftMode == LOCAL_SHIFT_TEMP) {                                // if LOCAL_SHIFT_TEMP mode, blink led

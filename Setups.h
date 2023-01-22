@@ -23,7 +23,7 @@ String actions_labels[ROWS * COLS] = {  // label to be displayed
   {"FreeHand\nSelect tmp."}, {"Move temp."},           {"Unselect\nAll"}, {"LocalShift"},
   {"Only canvas"},           {"Isolate\nlayer"},       {"Select\nlayer"}, {"BackSpace\nFill bgCol."},
   {"Shift\nResiz.Brsh"},     {"ShadeColor\nselector"}, {"Pie menu"},      {"Zoom\n(Ctrl+SPC)"},
-  {"Color pick\n(Ctrl)"},    {"Move temp."},           {"Mirror\n(M)"},   {"SPC"}
+  {"Color pick\n(Ctrl)"},    {"Undo\n(Ctrl Z)"},       {"Mirror\n(M)"},   {"SPC"}
 };
 
 
@@ -37,10 +37,10 @@ char actions_LocalShift[ROWS * COLS][2] = {  // code sent when a key is pressed.
 };
 
 String actions_LocalShift_labels[ROWS * COLS] = {  // label to be displayed
-  {"FreeHand\nSelect tmp."}, {"Move temp."},           {"unselect\nAll"}, {"LocalShift"},
-  {"Only canvas"},           {"Isolate\nlayer"},       {"Select\nlayer"}, {"BackSpace\Fill bgCol."},
-  {"Shift\nResiz.Brsh"},     {"ShadeColor\nselector"}, {"Pie menu"},      {"Zoom\(Ctrl+SPC)"},
-  {"Color pick\(Ctrl)"},     {"Move temp."},           {"Mirror\(M)"},    {"SPC"}
+  {"TransfTool\n(Ctrl T)"},  {"HVS adj.\n(Ctrl U)"},   {"Properties\nF3"},       {"LocalShift"},
+  {"Select all\n(Ctrl A)"},  {"Group\n(Ctrl G)"},      {"ClipGroup\n(Alt G)"},   {"Enter + B\n(Enter and\nsel.Brush)"},
+  {"Exch.Fg/Bg\ncolor\n(X)"},{"ColBalance\n(Ctrl B)"},  {"InvertSelec\n(Ctrl K)"},{"Levels\n(Ctrl L)"},
+  {"Cut\n(Ctrl X)"},         {"Copy\n(Ctrl C)"},       {"Paste\n(Ctrl v))"},     {"Paste in\nsame layer\(Shift V)"}
 };
 
 
