@@ -3,6 +3,9 @@
 */
 
 
+#define SETUP2USE "Setup1.h"
+
+
 ///////////////////////////////////////////////////////////////////////////////   4X4 keyboard   ///////////////////////////////////////////////////////
 
 #include <Keyboard.h>               // library for USB communication
@@ -17,11 +20,6 @@ char keys[ROWS][COLS] = {           // characters behind number 9 are the next i
   {'<', '=', '>', '?'}
 };
 
-byte rowPins[ROWS] = {7, 8, 9, 10}; //rows
-byte colPins[COLS] = {3, 4, 5, 6};  //columns
-
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
-
 enum LOCAL_SHIFT_MODES {
   NO_LOCAL_SHIFT = 0,
   LOCAL_SHIFT_TEMP,                         // Pressing once localShift key. Then, after pressing any other key, the system automaticaly return to a NO_LOCAL_SHIFT mode
@@ -31,7 +29,6 @@ enum LOCAL_SHIFT_MODES {
 char key;
 LOCAL_SHIFT_MODES localShiftMode = NO_LOCAL_SHIFT;
 
-#define pin_LED_Status A2
 #define millis_LED_LocalShift 150
 #define millis_LED_TestMode_High 50
 #define millis_LED_TestMode_Low 900
@@ -44,15 +41,6 @@ long lastMillis_LED_Status = 0;
 
 #define N_ENCODERS 3
 
-// Change these two numbers to the pins connected to your encoder.
-//   Best Performance: both pins have interrupt capability
-//   Good Performance: only the first pin has interrupt capability
-//   Low Performance:  neither pin has interrupt capability
-Encoder myEnc0(2, 16);
-Encoder myEnc1(0, 14);
-Encoder myEnc2(1, 15);
-//   avoid using pins with LEDs attached
-
 #define INX_ENCODER_UP 0
 #define INX_ENCODER_DOWN 1
 
@@ -60,9 +48,6 @@ Encoder myEnc2(1, 15);
 //////////////////////////////////////////////////////////////////////   Analog button (3 keys readed in only one analogic input)  ////////////////////////
 
 #include <AnalogMultiButton.h>
-
-// define the pin you want to use
-const int ENCODER_BUTTONS_ANALOG_PIN = A3;
 
 // set how many buttons you have connected
 const int ENCODER_BUTTONS_TOTAL = N_ENCODERS;
@@ -78,12 +63,16 @@ const int ENCODER0_BUTTON = 0;
 const int ENCODER1_BUTTON = 1;
 const int ENCODER2_BUTTON = 2;
 
+
+#include SETUP2USE    
+#include "Display.h"
+
+#define CF(s) ((const __FlashStringHelper *)s)
+
+Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+
 // make an AnalogMultiButton object, pass in the pin, total and values array
 AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TOTAL, ENCODER_BUTTONS_VALUES);
-
-
-#include "Setups.h"
-#include "Display.h"
 
 boolean testMode = false;
 
@@ -91,9 +80,12 @@ boolean testMode = false;
 /////////////////////////////////////////////////////// setup //////////////////////////////////////////////////////////////
 void setup() {
   Serial.begin(115200);
-  Serial.println("Starting...");
+  delay(3000);
+  Serial.println(F("Starting..."));
 
-  initDisplay();
+  if (bUseDisplay) {
+    initDisplay();
+  }
 
   //Switch off the serial port leds
   pinMode(LED_BUILTIN_TX, INPUT);
@@ -105,6 +97,8 @@ void setup() {
   keypad.setDebounceTime(50);
 
   Keyboard.begin();
+
+  Serial.println(F("FinSetup"));
 }
 
 
@@ -113,7 +107,6 @@ void setup() {
 /////////////////////////////////////////////////////// loop //////////////////////////////////////////////////////////////
 
 void loop() {
-  String msg;
   int keyIndex;
   // Fills kpd.key[ ] array with up-to 10 active keys. Returns true if there are ANY active keys.
   if (keypad.getKeys()) {
@@ -122,8 +115,6 @@ void loop() {
         keyIndex = keypad.key[i].kchar - char('0');           // get the index from 0 to 15
         switch (keypad.key[i].kstate) {                       // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
           case PRESSED:
-            //msg = " PRESSED.";
-
             if (keyIndex == index_LocalShiftKey) {
               switch (localShiftMode) {
                 case NO_LOCAL_SHIFT:
@@ -138,7 +129,7 @@ void loop() {
                   break;
               }
               Keyboard.releaseAll();                         // just in case some other previous key still pressed...
-              displayLocalShiftState();
+              displayStatus();
               refreshLED_Status();
               break;
             }
@@ -146,23 +137,26 @@ void loop() {
             if (! testMode) {
               sendKeyPressed( ( (localShiftMode == NO_LOCAL_SHIFT) ? actions : actions_LocalShift), keyIndex);
             }
-            displayKeyLabel( ( (localShiftMode == NO_LOCAL_SHIFT) ? actions_labels : actions_LocalShift_labels), keyIndex);
+
+            if (localShiftMode == NO_LOCAL_SHIFT) {
+              displayKeyLabel( CF( actions_labels[keyIndex]));
+            } else {
+              displayKeyLabel( CF( actions_LocalShift_labels[keyIndex]));
+            }
+            
             break;
 
           case HOLD:
-            //  msg = " HOLD.";
             if (testModeEnabled && (keyIndex == index_LocalShiftKey)) {  // Switch test mode
               Keyboard.releaseAll();                                     // just in case some other previous key still pressed...
               localShiftMode = NO_LOCAL_SHIFT;                           // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
               testMode= !testMode;
-              displayTestMode();
+              displayStatus();
               refreshLED_Status();
             }
             break;
 
           case RELEASED:
-            //msg = " RELEASED.";
-
             if (keyIndex == index_LocalShiftKey) {
               Keyboard.releaseAll();                        // just in case some other previous key still pressed...
               break;
@@ -170,7 +164,7 @@ void loop() {
             if (localShiftMode == LOCAL_SHIFT_TEMP) {
               localShiftMode = NO_LOCAL_SHIFT;
               Keyboard.releaseAll();
-              displayLocalShiftState();
+              displayStatus();
               refreshLED_Status();
             }
 
@@ -183,9 +177,8 @@ void loop() {
             //  break;
         }
 
-        //Serial.print("Key ");
+        //Serial.print(F("Key "));
         //Serial.print(keypad.key[i].kchar);
-        //Serial.println(msg);
       }
     }
   }
@@ -224,7 +217,6 @@ void loop() {
   }
 
   if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
-    Serial.println("btn1");
     Keyboard.press(actionsEncoder_Buttons[1][0]);
     if (actionsEncoder_Buttons[1][1] != 1) {
       Keyboard.press(actionsEncoder_Buttons[1][1]);
@@ -232,7 +224,6 @@ void loop() {
   }
 
   if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {
-    Serial.println("btn2");
     Keyboard.press(actionsEncoder_Buttons[2][0]);
     if (actionsEncoder_Buttons[2][1] != 0) {
       Keyboard.press(actionsEncoder_Buttons[2][1]);
@@ -246,13 +237,12 @@ void loop() {
   }
   //
 
-
-}
-
+} // loop
 
 
 
-/////////////////////////////////////////////////////// other functions //////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////// other functions //////////////////////////////////////////////////////////////
 
 void sendKeyPressed(char acts[ROWS * COLS][2], int keyIndex) {
   Keyboard.press(acts[keyIndex][0]);           // send the first action for the corresponding key
