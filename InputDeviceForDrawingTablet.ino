@@ -151,9 +151,9 @@ void loop() {
 
           case HOLD:
             //  msg = " HOLD.";
-            if (keyIndex == index_LocalShiftKey) {           // Switch test mode
-              Keyboard.releaseAll();                         // just in case some other previous key still pressed...
-              localShiftMode = NO_LOCAL_SHIFT;               // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
+            if (testModeEnabled && (keyIndex == index_LocalShiftKey)) {  // Switch test mode
+              Keyboard.releaseAll();                                     // just in case some other previous key still pressed...
+              localShiftMode = NO_LOCAL_SHIFT;                           // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
               testMode= !testMode;
               displayTestMode();
               refreshLED_Status();

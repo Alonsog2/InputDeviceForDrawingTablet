@@ -83,7 +83,9 @@ void displayLocalShiftState(){
 
   if (testMode) {
     msg = "Shift state= " + msg;
-    Keyboard.println(msg);
+    if (sendInfoToComputerInTestMode) {
+      Keyboard.println(msg);
+    }
     Serial.println(msg);
   }
 }
@@ -99,7 +101,9 @@ void displayKeyLabel(String labels[ROWS * COLS], int keyIndex){
   }
 
   if (testMode) {
-    Keyboard.println(labels[keyIndex]);
+    if (sendInfoToComputerInTestMode) {
+      Keyboard.println(labels[keyIndex]);
+    }
     Serial.println(labels[keyIndex]);
   }
 }
@@ -117,7 +121,9 @@ void displayTestMode() {
   if (testMode) {
     msg = "TestMode=4 ";
     msg += ((testMode) ? "ON" : "OFF");
-    Keyboard.println(msg);
+    if (sendInfoToComputerInTestMode) {
+      Keyboard.println(msg);
+    }
     Serial.println(msg);
   }  
 }
