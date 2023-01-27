@@ -92,7 +92,7 @@ void setup() {
   pinMode(LED_BUILTIN_RX, INPUT);
 
   pinMode(pin_LED_Status, OUTPUT);                       // LED for localShift indication
-  refreshLED_Status();
+  refreshLEDs_Status();
 
   keypad.setDebounceTime(50);
 
@@ -130,7 +130,7 @@ void loop() {
               }
               Keyboard.releaseAll();                         // just in case some other previous key still pressed...
               displayStatus();
-              refreshLED_Status();
+              refreshLEDs_Status();
               break;
             }
 
@@ -152,7 +152,7 @@ void loop() {
               localShiftMode = NO_LOCAL_SHIFT;                           // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
               testMode= !testMode;
               displayStatus();
-              refreshLED_Status();
+              refreshLEDs_Status();
             }
             break;
 
@@ -165,7 +165,7 @@ void loop() {
               localShiftMode = NO_LOCAL_SHIFT;
               Keyboard.releaseAll();
               displayStatus();
-              refreshLED_Status();
+              refreshLEDs_Status();
             }
 
             sendKeyDepressed( ( (localShiftMode) ? actions_LocalShift : actions), keyIndex);
@@ -182,7 +182,7 @@ void loop() {
       }
     }
   }
-  refreshLED_Status();
+  refreshLEDs_Status();
 
 
   // check the encoders
@@ -295,47 +295,54 @@ void resetEncoderN(int nEncoder) {
 
 
 
-void refreshLED_Status() {
+void refreshLEDs_Status() {
   static boolean prevStatusLed = false;
   static int nPulseTest = 0; 
   boolean newStatusLed;
 
-  if (testMode) {                                                               // TestMode
-    newStatusLed = prevStatusLed;
-    switch (nPulseTest) {
-      case 0:                                                                   // NO_LOCAL_SHIFT status -> One short blink and a large pause
-        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
-          lastMillis_LED_Status = millis();
-          newStatusLed = false;  
-          nPulseTest ++;
-        }
-        break;
-      case 1:                                                       
-        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
-          lastMillis_LED_Status = millis();
-          if (localShiftMode != NO_LOCAL_SHIFT) {                               // Other status than NO_LOCAL_SHIFT -> Two short blink and a large pause
-            newStatusLed = true;
+  if (testMode) {                                                                 // TestMode 
+    if (bUseLEDTestMode) {                                                        // Using 2 LED for status (Shift and TestMode)
+      digitalWrite(pin_LED_TestMode, HIGH);
+    } else {                                                                      // Using 1 LED for status (Shift and TestMode)
+      newStatusLed = prevStatusLed;
+      switch (nPulseTest) {                                                       
+        case 0:                                                                   // NO_LOCAL_SHIFT status -> One short blink and a large pause
+          if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+            lastMillis_LED_Status = millis();
+            newStatusLed = false;  
+            nPulseTest ++;
           }
-          nPulseTest ++;  
-        }
-        break;         
-      case 2:
-        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
-          lastMillis_LED_Status = millis();
-          newStatusLed = false;  
-          nPulseTest ++;
-        }
-        break;   
-      case 3:
-        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_Low) ) {
-          lastMillis_LED_Status = millis();
-          newStatusLed = true; 
-          nPulseTest = 0; 
-        }
-        break;       
+          break;
+        case 1:                                                       
+          if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+            lastMillis_LED_Status = millis();
+            if (localShiftMode != NO_LOCAL_SHIFT) {                               // Other status than NO_LOCAL_SHIFT -> Two short blink and a large pause
+              newStatusLed = true;
+            }
+            nPulseTest ++;  
+          }
+          break;         
+        case 2:
+          if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+            lastMillis_LED_Status = millis();
+            newStatusLed = false;  
+            nPulseTest ++;
+          }
+          break;   
+        case 3:
+          if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_Low) ) {
+            lastMillis_LED_Status = millis();
+            newStatusLed = true; 
+            nPulseTest = 0; 
+          }
+          break;       
+      } 
     }
-    
+
   } else {                                                                   // NO testMode (normal)
+    if (bUseLEDTestMode) { 
+      digitalWrite(pin_LED_TestMode, LOW);                                   // LedTestMode Off
+    }
     if (localShiftMode == LOCAL_SHIFT_TEMP) {                                // if LOCAL_SHIFT_TEMP mode, blink led
       newStatusLed = prevStatusLed;
       if (millis() > (lastMillis_LED_Status + millis_LED_LocalShift) ) {
