@@ -92,6 +92,11 @@ void setup() {
   pinMode(LED_BUILTIN_RX, INPUT);
 
   pinMode(pin_LED_Status, OUTPUT);                       // LED for localShift indication
+  
+  if (bUseLEDTestMode) { 
+    pinMode(pin_LED_TestMode, OUTPUT);                   // LED for TestMode indication (If enabled in setup)
+  }
+
   refreshLEDs_Status();
 
   keypad.setDebounceTime(50);
@@ -297,12 +302,27 @@ void resetEncoderN(int nEncoder) {
 
 void refreshLEDs_Status() {
   static boolean prevStatusLed = false;
+  static boolean prevStatusLed_TestMode = false;
   static int nPulseTest = 0; 
   boolean newStatusLed;
+  boolean newStatusLed_TestMode;
 
   if (testMode) {                                                                 // TestMode 
     if (bUseLEDTestMode) {                                                        // Using 2 LED for status (Shift and TestMode)
-      digitalWrite(pin_LED_TestMode, HIGH);
+      if (localShiftMode == NO_LOCAL_SHIFT) {
+        newStatusLed_TestMode = HIGH;
+      } else {
+        newStatusLed_TestMode = prevStatusLed_TestMode;
+        if (millis() > (lastMillis_LED_Status + millis_LED_LocalShift) ) {
+          lastMillis_LED_Status = millis();
+          newStatusLed_TestMode = (! prevStatusLed_TestMode);
+        }
+      }
+      digitalWrite(pin_LED_TestMode, newStatusLed_TestMode);
+      prevStatusLed_TestMode = newStatusLed_TestMode;
+      newStatusLed = LOW;
+
+  
     } else {                                                                      // Using 1 LED for status (Shift and TestMode)
       newStatusLed = prevStatusLed;
       switch (nPulseTest) {                                                       

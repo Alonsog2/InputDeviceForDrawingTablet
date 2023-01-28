@@ -8,9 +8,9 @@ boolean bUseDisplay = true;
 
 #define pin_LED_Status A2
 
-#define pin_LED_TestMode A2
+#define pin_LED_TestMode A1
 
-boolean bUseLEDTestMode = false;
+boolean bUseLEDTestMode = true;
 
 
 ///////////////////////////////////////////////////////////////////// 4x4 Keyboard /////////////////////////////////////////
