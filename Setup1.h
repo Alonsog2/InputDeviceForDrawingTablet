@@ -5,6 +5,8 @@
 // PINs 2,3 are used by Wire library (SDA, SCL in Display)
 boolean bUseDisplay = false;
 
+boolean bUseMIDI =false;
+#define START_IN_MIDI_MODE false;
 
 #define pin_LED_Status A2
 

@@ -3,7 +3,8 @@
 */
 
 
-#define SETUP2USE "Setup1.h"
+#define SETUP2USE "Setup2.h"
+
 
 
 ///////////////////////////////////////////////////////////////////////////////   4X4 keyboard   ///////////////////////////////////////////////////////
@@ -66,6 +67,8 @@ const int ENCODER2_BUTTON = 2;
 
 #include SETUP2USE    
 #include "Display.h"
+#include "MIDI.h"
+
 
 #define CF(s) ((const __FlashStringHelper *)s)
 
@@ -115,11 +118,16 @@ void loop() {
   int keyIndex;
   // Fills kpd.key[ ] array with up-to 10 active keys. Returns true if there are ANY active keys.
   if (keypad.getKeys()) {
-    for (int i = 0; i < LIST_MAX; i++) {                        // Scan the whole key list.
-      if ( keypad.key[i].stateChanged ) {                       // Only find keys that have changed state.
-        keyIndex = keypad.key[i].kchar - char('0');           // get the index from 0 to 15
-        switch (keypad.key[i].kstate) {                       // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
+    for (int i = 0; i < LIST_MAX; i++) {                       // Scan the whole key list.
+      if ( keypad.key[i].stateChanged ) {                      // Only find keys that have changed state.
+        keyIndex = keypad.key[i].kchar - char('0');            // get the index from 0 to 15
+        switch (keypad.key[i].kstate) {                        // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
           case PRESSED:
+            if (MIDImode) {
+              pressedMIDIKey(keypad.key[i].kchar);
+              break;  
+            }
+            
             if (keyIndex == index_LocalShiftKey) {
               switch (localShiftMode) {
                 case NO_LOCAL_SHIFT:
@@ -135,7 +143,7 @@ void loop() {
               }
               Keyboard.releaseAll();                         // just in case some other previous key still pressed...
               displayStatus();
-              refreshLEDs_Status();
+              //refreshLEDs_Status();
               break;
             }
 
@@ -148,7 +156,6 @@ void loop() {
             } else {
               displayKeyLabel( CF( actions_LocalShift_labels[keyIndex]));
             }
-            
             break;
 
           case HOLD:
@@ -157,11 +164,16 @@ void loop() {
               localShiftMode = NO_LOCAL_SHIFT;                           // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
               testMode= !testMode;
               displayStatus();
-              refreshLEDs_Status();
+              //refreshLEDs_Status();
             }
             break;
 
           case RELEASED:
+            if (MIDImode) {
+              releasedMIDIKey(keypad.key[i].kchar);
+              break;  
+            }
+            
             if (keyIndex == index_LocalShiftKey) {
               Keyboard.releaseAll();                        // just in case some other previous key still pressed...
               break;
@@ -214,7 +226,7 @@ void loop() {
   // check encoder-buttons  ////////////////////////////////////////////////////////////////////////////////////////
   encoder_buttons.update();
 
-  if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {   // 0= Detect only the first pressing
+  if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {     // 0= Detect only the first pressing
     Keyboard.press(actionsEncoder_Buttons[0][0]);
     if (actionsEncoder_Buttons[0][1] != 0) {                     // if the value is other than 0, send it
       Keyboard.press(actionsEncoder_Buttons[0][1]);
@@ -229,10 +241,12 @@ void loop() {
   }
 
   if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {
-    Keyboard.press(actionsEncoder_Buttons[2][0]);
-    if (actionsEncoder_Buttons[2][1] != 0) {
-      Keyboard.press(actionsEncoder_Buttons[2][1]);
-    }
+    MIDImode = !MIDImode;
+    switchMIDIAndKeyboard();
+//    Keyboard.press(actionsEncoder_Buttons[2][0]);
+//    if (actionsEncoder_Buttons[2][1] != 0) {
+//      Keyboard.press(actionsEncoder_Buttons[2][1]);
+//    }
 
   }
 
@@ -376,4 +390,15 @@ void refreshLEDs_Status() {
 
   digitalWrite(pin_LED_Status, newStatusLed);
   prevStatusLed = newStatusLed;
+}
+
+
+
+void switchMIDIAndKeyboard(){
+  if (MIDImode){
+    digitalWrite(pin_LED_Status, HIGH);      // both LEDS ON;
+    digitalWrite(pin_LED_TestMode, HIGH);
+  } else {
+    localShiftMode == NO_LOCAL_SHIFT;   // refresh LED status inside 'loop'
+  }
 }
