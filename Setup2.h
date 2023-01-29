@@ -5,6 +5,9 @@
 // PINs 2,3 are used by Wire library (SDA, SCL in Display)
 boolean bUseDisplay = true;
 
+boolean bUseRotaryEncoders = false;
+boolean bUseEncoderButtons = false;
+
 boolean bUseMIDI =true;
 #define START_IN_MIDI_MODE false;
 
@@ -22,6 +25,7 @@ byte rowPins[ROWS] = {4,5,6,7}; //rows
 byte colPins[COLS] = {8,9,10,A0};  //columns
 
 int index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
+int index_SwitchMIDIKey = 12;               // index of key for changing to MIDI mode with longPress (system must be in textMode)
 
 // Actions for 4x4 keyboard
 const char actions[ROWS * COLS][2] = {  // code sent when a key is pressed. if second value is other than 0 send it
@@ -149,6 +153,42 @@ const char actionsEncoder_Buttons[N_ENCODERS][2] = { // First key sent for each 
   {'e', 0}    // Toggle eraser mode
 };
 
+
+
+////////////////////////////////////////////////////////// MIDI /////////////////////////////////////////////////////////
+
+#define GLOBAL_MIDI_CHANNEL 1  // (1-16)
+
+enum MIDI_ACTIONS_STRUCTURE {
+  MIDI_CHANNEL = 0,           // Channel (1-16/0=global)
+  MIDI_CC_OR_NOTE,            // CC or Note (0,1)
+  MIDI_MOMENTARY,             // momentary or toggle (0/1)
+  MIDI_nCC_OR_NOTEPITCH,      // nCC or NotePitch
+  MIDI_ValMin_OR_velNoteOff,  // valMinCC or noteOff
+  MIDI_ValMax_OR_velNoteOn    // valMaxCC or NoteOn
+};
+
+const byte actionsMIDI[ROWS * COLS][6] = {  
+ {9, 0, 0, 65, 11, 96},
+ {0, 1, 1, 66, 33, 126},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127}
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

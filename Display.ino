@@ -90,6 +90,14 @@ void displayStatus() {
         break;
     }
   }
+
+  if (MIDImode) {
+    msg="MIDI mode";
+    if (displayPresent) {
+      display.clearDisplay();
+    }
+  }
+  
   if (displayPresent) {
     clearAreaUPDisplay();
     display.setCursor(0, 0);

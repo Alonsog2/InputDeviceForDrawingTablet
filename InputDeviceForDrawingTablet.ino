@@ -105,8 +105,20 @@ void setup() {
   keypad.setDebounceTime(50);
 
   Keyboard.begin();
-
+    
+//    boolean kk;
+//    for (int i=0;i<100;i++) {
+//      encoder_buttons.update();
+//      delay(100);
+//      kk=encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0);
+//      kk=encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0);
+//      kk=encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0);
+//      Serial.println(i);
+//    }  
+  
   Serial.println(F("FinSetup"));
+  Serial.println(MIDImode);
+  
 }
 
 
@@ -124,7 +136,7 @@ void loop() {
         switch (keypad.key[i].kstate) {                        // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
           case PRESSED:
             if (MIDImode) {
-              pressedMIDIKey(keypad.key[i].kchar);
+              pressedMIDIKey(keyIndex);
               break;  
             }
             
@@ -159,6 +171,10 @@ void loop() {
             break;
 
           case HOLD:
+            if (testMode && (keyIndex == index_SwitchMIDIKey)) {         // Switch to MIDI mode
+              switchMIDIAndKeyboardMode();
+              break;
+            }
             if (testModeEnabled && (keyIndex == index_LocalShiftKey)) {  // Switch test mode
               Keyboard.releaseAll();                                     // just in case some other previous key still pressed...
               localShiftMode = NO_LOCAL_SHIFT;                           // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
@@ -170,7 +186,7 @@ void loop() {
 
           case RELEASED:
             if (MIDImode) {
-              releasedMIDIKey(keypad.key[i].kchar);
+              releasedMIDIKey(keyIndex);
               break;  
             }
             
@@ -202,57 +218,59 @@ void loop() {
   refreshLEDs_Status();
 
 
-  // check the encoders
-  long newPositionEncoder;
-
-  for (int nEncoder = 0; nEncoder < N_ENCODERS ; nEncoder++) {
-    int indexUpDown = -1;
-
-    newPositionEncoder = chekEncoderN(nEncoder);
-    if (newPositionEncoder > 1) indexUpDown = INX_ENCODER_UP;
-    if (newPositionEncoder < -1) indexUpDown = INX_ENCODER_DOWN;
-    if (indexUpDown != -1) {
-      Keyboard.press(actions1Encoders[nEncoder][indexUpDown]);
-      if (actions2Encoders[nEncoder][indexUpDown] != 0) {                    // if the value is other than 0, send it
-        Keyboard.press(actions2Encoders[nEncoder][indexUpDown] );
+  // check the ENCODERS
+  if (bUseRotaryEncoders) {
+    long newPositionEncoder;
+  
+    for (int nEncoder = 0; nEncoder < N_ENCODERS ; nEncoder++) {
+      int indexUpDown = -1;
+  
+      newPositionEncoder = chekEncoderN(nEncoder);
+      if (newPositionEncoder > 1) indexUpDown = INX_ENCODER_UP;
+      if (newPositionEncoder < -1) indexUpDown = INX_ENCODER_DOWN;
+      if (indexUpDown != -1) {
+        Keyboard.press(actions1Encoders[nEncoder][indexUpDown]);
+        if (actions2Encoders[nEncoder][indexUpDown] != 0) {                    // if the value is other than 0, send it
+          Keyboard.press(actions2Encoders[nEncoder][indexUpDown] );
+        }
+        resetEncoderN(nEncoder);
+        Keyboard.releaseAll();
       }
-      resetEncoderN(nEncoder);
-      Keyboard.releaseAll();
     }
   }
   //
 
 
   // check encoder-buttons  ////////////////////////////////////////////////////////////////////////////////////////
-  encoder_buttons.update();
-
-  if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {     // 0= Detect only the first pressing
-    Keyboard.press(actionsEncoder_Buttons[0][0]);
-    if (actionsEncoder_Buttons[0][1] != 0) {                     // if the value is other than 0, send it
-      Keyboard.press(actionsEncoder_Buttons[0][1]);
+  if (bUseEncoderButtons) {
+    encoder_buttons.update();
+  
+    if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {     // 0= Detect only the first pressing
+      Keyboard.press(actionsEncoder_Buttons[0][0]);
+      if (actionsEncoder_Buttons[0][1] != 0) {                     // if the value is other than 0, send it
+        Keyboard.press(actionsEncoder_Buttons[0][1]);
+      }
     }
-  }
-
-  if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
-    Keyboard.press(actionsEncoder_Buttons[1][0]);
-    if (actionsEncoder_Buttons[1][1] != 1) {
-      Keyboard.press(actionsEncoder_Buttons[1][1]);
+  
+    if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
+      Keyboard.press(actionsEncoder_Buttons[1][0]);
+      if (actionsEncoder_Buttons[1][1] != 1) {
+        Keyboard.press(actionsEncoder_Buttons[1][1]);
+      }
     }
-  }
-
-  if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {
-    MIDImode = !MIDImode;
-    switchMIDIAndKeyboard();
-//    Keyboard.press(actionsEncoder_Buttons[2][0]);
-//    if (actionsEncoder_Buttons[2][1] != 0) {
-//      Keyboard.press(actionsEncoder_Buttons[2][1]);
-//    }
-
-  }
-
-  // check if some encoder_button has been depressed
-  if (encoder_buttons.onRelease(ENCODER0_BUTTON) || encoder_buttons.onRelease(ENCODER1_BUTTON) || encoder_buttons.onRelease(ENCODER2_BUTTON)) {
-    Keyboard.releaseAll();
+  
+    if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {
+      Keyboard.press(actionsEncoder_Buttons[2][0]);
+      if (actionsEncoder_Buttons[2][1] != 0) {
+        Keyboard.press(actionsEncoder_Buttons[2][1]);
+      }
+  
+    }
+  
+    // check if some encoder_button has been depressed
+    if (encoder_buttons.onRelease(ENCODER0_BUTTON) || encoder_buttons.onRelease(ENCODER1_BUTTON) || encoder_buttons.onRelease(ENCODER2_BUTTON)) {
+      Keyboard.releaseAll();
+    }
   }
   //
 
@@ -394,11 +412,14 @@ void refreshLEDs_Status() {
 
 
 
-void switchMIDIAndKeyboard(){
+void switchMIDIAndKeyboardMode(){
+  MIDImode = !MIDImode;
   if (MIDImode){
     digitalWrite(pin_LED_Status, HIGH);      // both LEDS ON;
     digitalWrite(pin_LED_TestMode, HIGH);
   } else {
+    sendMIDIreset();
     localShiftMode == NO_LOCAL_SHIFT;   // refresh LED status inside 'loop'
   }
+  displayStatus();
 }
