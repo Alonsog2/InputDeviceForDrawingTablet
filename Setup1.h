@@ -9,7 +9,7 @@ boolean bUseRotaryEncoders = true;
 boolean bUseEncoderButtons = true;
 
 boolean bUseMIDI =true;
-#define START_IN_MIDI_MODE true;
+#define START_IN_MIDI_MODE false;
 
 #define pin_LED_Status A2
 
