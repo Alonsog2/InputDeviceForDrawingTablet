@@ -29,6 +29,15 @@ byte MIDIvalRotaryEncoders[N_ENCODERS] = {
 
 
 
+void initCCvalues_Encoders(){
+  for (int i = 0; i<N_ENCODERS; i++) {
+    byte channel = (actionsMIDIEncoders[i][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[i][MIDI_CHANNEL];
+    MIDIvalRotaryEncoders[i] = (actionsMIDIEncoders[i][MIDI_ValMax] + actionsMIDIEncoders[i][MIDI_ValMin]) / 2 ;
+  }
+}
+
+
+
 void sendNoteOn_USB(byte pitch, byte velocity, byte channel) {               // enviar notaOn al PC por USB del Leonardo
   midiEventPacket_t midiPack = {0x09, 0x90 | (--channel), pitch, velocity};  // MIDIUSB numera los canales del 0 al 15
   MidiUSB.sendMIDI(midiPack);
@@ -59,6 +68,9 @@ void sendMIDIreset(){
   MidiUSB.flush();
 }
 
+
+
+// enum defined in Setups/////////////////////////////////
 //  MIDI_CHANNEL = 0,           // Channel (1-16/0=global)
 //  MIDI_CC_OR_NOTE,            // CC or Note (0,1)
 //  MIDI_MOMENTARY,             // momentary or toggle (0/1)
@@ -101,4 +113,9 @@ void releasedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
   } else {                                                                                          // CC
     sendCtrlChange_USB(acts[keyIndex][MIDI_nCC_OR_NOTEPITCH],acts[keyIndex][MIDI_ValMin_OR_velNoteOff], channel);   
   }
+}
+
+
+void initMIDI() {
+  initCCvalues_Encoders();
 }

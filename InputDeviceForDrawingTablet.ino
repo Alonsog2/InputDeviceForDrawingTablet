@@ -66,7 +66,7 @@ const int ENCODER1_BUTTON = 1;
 const int ENCODER2_BUTTON = 2;
 
 
-#include SETUP_TO_USE    
+#include SETUP_TO_USE
 #include "Display.h"
 #include "MIDI.h"
 
@@ -91,13 +91,17 @@ void setup() {
     initDisplay();
   }
 
+  if (bUseMIDI) {
+    initMIDI();
+  }
+
   //Switch off the serial port leds
   pinMode(LED_BUILTIN_TX, INPUT);
   pinMode(LED_BUILTIN_RX, INPUT);
 
   pinMode(pin_LED_Status, OUTPUT);                       // LED for localShift indication
-  
-  if (bUseLEDTestMode) { 
+
+  if (bUseLEDTestMode) {
     pinMode(pin_LED_TestMode, OUTPUT);                   // LED for TestMode indication (If enabled in setup)
   }
 
@@ -106,10 +110,10 @@ void setup() {
   keypad.setDebounceTime(50);
 
   Keyboard.begin();
- 
+
   Serial.println(F("FinSetup"));
   Serial.println(MIDImode);
-  
+
 }
 
 
@@ -127,14 +131,14 @@ void loop() {
         switch (keypad.key[i].kstate) {                        // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
           case PRESSED:
             if (MIDImode) {
-              pressedMIDIKey(actionsMIDI,keyIndex);
-              break;  
+              pressedMIDIKey(actionsMIDI, keyIndex);
+              break;
             }
-            
+
             if (keyIndex == index_LocalShiftKey) {
               switch (localShiftMode) {
                 case NO_LOCAL_SHIFT:
-                  localShiftMode = (testMode) ? LOCAL_SHIFT_LOCKED : LOCAL_SHIFT_TEMP;  // In testMode, always go to LOCAL_SHIFT_LOCKED (skiping LOCAL_SHIFT_TEMP) 
+                  localShiftMode = (testMode) ? LOCAL_SHIFT_LOCKED : LOCAL_SHIFT_TEMP;  // In testMode, always go to LOCAL_SHIFT_LOCKED (skiping LOCAL_SHIFT_TEMP)
                   break;
                 case LOCAL_SHIFT_TEMP:
                   localShiftMode = LOCAL_SHIFT_LOCKED;
@@ -168,7 +172,7 @@ void loop() {
             if (testModeEnabled && (keyIndex == index_LocalShiftKey)) {  // Switch test mode
               Keyboard.releaseAll();                                     // just in case some other previous key still pressed...
               localShiftMode = NO_LOCAL_SHIFT;                           // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
-              testMode= !testMode;
+              testMode = !testMode;
               displayStatus();
             }
             break;
@@ -176,9 +180,9 @@ void loop() {
           case RELEASED:
             if (MIDImode) {
               releasedMIDIKey(actionsMIDI, keyIndex);
-              break;  
+              break;
             }
-            
+
             if (keyIndex == index_LocalShiftKey) {
               Keyboard.releaseAll();                        // just in case some other previous key still pressed...
               break;
@@ -210,23 +214,23 @@ void loop() {
   // check the ENCODERS
   if (bUseRotaryEncoders) {
     long newPositionEncoder;
-  
+
     for (int nEncoder = 0; nEncoder < N_ENCODERS ; nEncoder++) {
       int indexUpDown = -1;
-  
+
       newPositionEncoder = chekEncoderN(nEncoder);
       if (newPositionEncoder > 1) indexUpDown = INX_ENCODER_DOWN;
       if (newPositionEncoder < -1) indexUpDown = INX_ENCODER_UP;
       if (indexUpDown != -1) {
-        if (MIDImode) { // MIDI  
+        if (MIDImode) { // MIDI
           byte channel = (actionsMIDIEncoders[nEncoder][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[nEncoder][MIDI_CHANNEL];
           byte value = MIDIvalRotaryEncoders[nEncoder];
           if (indexUpDown == INX_ENCODER_UP && value < actionsMIDIEncoders[nEncoder][MIDI_ValMax]) value++;
-          if (indexUpDown == INX_ENCODER_DOWN && value > actionsMIDIEncoders[nEncoder][MIDI_ValMin]) value--; 
+          if (indexUpDown == INX_ENCODER_DOWN && value > actionsMIDIEncoders[nEncoder][MIDI_ValMin]) value--;
           MIDIvalRotaryEncoders[nEncoder] = value;
           sendCtrlChange_USB(actionsMIDIEncoders[nEncoder][MIDI_nCC], value, channel);
-         // End MIDI
-          
+          // End MIDI
+
         } else { // Keyboard
           if (! testMode) {
             Keyboard.press(actions1Encoders[nEncoder][indexUpDown]);
@@ -234,13 +238,13 @@ void loop() {
               Keyboard.press(actions2Encoders[nEncoder][indexUpDown] );
             }
           }
-  
+
           displayKeyLabel( (indexUpDown == INX_ENCODER_UP) ? CF(actionsEncoderIncr_labels[nEncoder]) : CF(actionsEncoderDecr_labels[nEncoder]));
-          
+
           Keyboard.releaseAll();
-        // End Keyboard  
-        }  
-        
+          // End Keyboard
+        }
+
         resetEncoderN(nEncoder);
       }
     }
@@ -264,34 +268,34 @@ void loop() {
       if (MIDImode) {
         pressedMIDIKey(actionsMIDIEncodersButtons, keyIndex);
       } else {
-      if (! testMode) {
-        sendKeyPressed(actionsEncoder_Buttons, keyIndex);
-      }
-      displayKeyLabel( CF( actionsEncoder_labels[keyIndex]));
+        if (! testMode) {
+          sendKeyPressed(actionsEncoder_Buttons, keyIndex);
+        }
+        displayKeyLabel( CF( actionsEncoder_labels[keyIndex]));
       }
     }
 
     // check if some encoder_button has been depressed
     keyIndex = -1;
-    if (encoder_buttons.onRelease(ENCODER0_BUTTON)) {     
+    if (encoder_buttons.onRelease(ENCODER0_BUTTON)) {
       keyIndex = 0;
     } else if (encoder_buttons.onRelease(ENCODER1_BUTTON)) {
       keyIndex = 1;
     } else if (encoder_buttons.onRelease(ENCODER2_BUTTON)) {
       keyIndex = 2;
     }
-    
+
     if (keyIndex != -1) {
       if (MIDImode) {                                            // MIDI mode
         releasedMIDIKey(actionsMIDIEncodersButtons, keyIndex);
       } else {                                                   // Keyboard
-        if (! testMode) {                                
+        if (! testMode) {
           sendKeyDepressed(actionsEncoder_Buttons, keyIndex);
         }
         clearAreaBottomDisplay(true);
       }
     }
-    
+
   } // End ENCODER_BUTTONS
 
 } // loop
@@ -355,7 +359,7 @@ void resetEncoderN(int nEncoder) {
 void refreshLEDs_Status() {
   static boolean prevStatusLed = false;
   static boolean prevStatusLed_TestMode = false;
-  static int nPulseTest = 0; 
+  static int nPulseTest = 0;
   boolean newStatusLed;
   boolean newStatusLed_TestMode;
 
@@ -363,8 +367,8 @@ void refreshLEDs_Status() {
     refreshLEDs_inMIDImode();
     return;
   }
-  
-  if (testMode) {                                                                 // TestMode 
+
+  if (testMode) {                                                                 // TestMode
     if (bUseLEDTestMode) {                                                        // Using 2 LED for status (Shift and TestMode)
       if (localShiftMode == NO_LOCAL_SHIFT) {
         newStatusLed_TestMode = HIGH;
@@ -379,45 +383,45 @@ void refreshLEDs_Status() {
       prevStatusLed_TestMode = newStatusLed_TestMode;
       newStatusLed = LOW;
 
-  
+
     } else {                                                                      // Using 1 LED for status (Shift and TestMode)
       newStatusLed = prevStatusLed;
-      switch (nPulseTest) {                                                       
+      switch (nPulseTest) {
         case 0:                                                                   // NO_LOCAL_SHIFT status -> One short blink and a large pause
           if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
             lastMillis_LED_Status = millis();
-            newStatusLed = false;  
+            newStatusLed = false;
             nPulseTest ++;
           }
           break;
-        case 1:                                                       
+        case 1:
           if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
             lastMillis_LED_Status = millis();
             if (localShiftMode != NO_LOCAL_SHIFT) {                               // Other status than NO_LOCAL_SHIFT -> Two short blink and a large pause
               newStatusLed = true;
             }
-            nPulseTest ++;  
+            nPulseTest ++;
           }
-          break;         
+          break;
         case 2:
           if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
             lastMillis_LED_Status = millis();
-            newStatusLed = false;  
+            newStatusLed = false;
             nPulseTest ++;
           }
-          break;   
+          break;
         case 3:
           if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_Low) ) {
             lastMillis_LED_Status = millis();
-            newStatusLed = true; 
-            nPulseTest = 0; 
+            newStatusLed = true;
+            nPulseTest = 0;
           }
-          break;       
-      } 
+          break;
+      }
     }
 
   } else {                                                                   // NO testMode (normal)
-    if (bUseLEDTestMode) { 
+    if (bUseLEDTestMode) {
       digitalWrite(pin_LED_TestMode, LOW);                                   // LedTestMode Off
     }
     if (localShiftMode == LOCAL_SHIFT_TEMP) {                                // if LOCAL_SHIFT_TEMP mode, blink led
@@ -441,12 +445,11 @@ void refreshLEDs_inMIDImode() {
   static boolean prevStatusLed = false;
   boolean newStatusLed;
   if (bUseLEDTestMode) {                                // both LEDS ON;
-    digitalWrite(pin_LED_Status, HIGH);                               
+    digitalWrite(pin_LED_Status, HIGH);
     digitalWrite(pin_LED_TestMode, HIGH);
   } else {                                              // Only 1 LED, blink
     newStatusLed = prevStatusLed;
     if (millis() > (lastMillis_LED_Status + millis_LED_MidiMode) ) {
-      Serial.println("pasa2");
       lastMillis_LED_Status = millis();
       newStatusLed = (! newStatusLed);
       digitalWrite(pin_LED_Status, newStatusLed);
@@ -456,9 +459,9 @@ void refreshLEDs_inMIDImode() {
 }
 
 
-void switchMIDIAndKeyboardMode(){
+void switchMIDIAndKeyboardMode() {
   MIDImode = !MIDImode;
-  if (MIDImode){
+  if (MIDImode) {
     digitalWrite(pin_LED_Status, HIGH);                                      // both LEDS ON;
     if (bUseLEDTestMode) digitalWrite(pin_LED_TestMode, HIGH);
   } else {
