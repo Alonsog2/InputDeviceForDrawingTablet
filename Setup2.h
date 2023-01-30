@@ -14,7 +14,6 @@ boolean bUseMIDI =true;
 #define pin_LED_Status A2
 
 #define pin_LED_TestMode A1
-
 boolean bUseLEDTestMode = true;
 
 
@@ -145,12 +144,43 @@ const char actions2Encoders[N_ENCODERS][2] = {       // second code to send, if 
   {0,  0}
 };
 
+const char ACT_ENC_INCR_LABEL_1[] PROGMEM = "Rotation\nRIGHT";
+const char ACT_ENC_INCR_LABEL_2[] PROGMEM = "Rotation\nIN";
+const char ACT_ENC_INCR_LABEL_3[] PROGMEM = "Brush\nsize +";
 
-// Actions for encoder_buttons
+const char* const actionsEncoderIncr_labels[ROWS * COLS] = {
+    ACT_ENC_INCR_LABEL_1,
+    ACT_ENC_INCR_LABEL_2,
+    ACT_ENC_INCR_LABEL_3
+};
+
+const char ACT_ENC_DECR_LABEL_1[] PROGMEM = "Rotation\nLEFT";
+const char ACT_ENC_DECR_LABEL_2[] PROGMEM = "Rotation\nOUT";
+const char ACT_ENC_DECR_LABEL_3[] PROGMEM = "Brush\nsize -";
+
+const char* const actionsEncoderDecr_labels[ROWS * COLS] = {
+    ACT_ENC_DECR_LABEL_1,
+    ACT_ENC_DECR_LABEL_2,
+    ACT_ENC_DECR_LABEL_3
+};
+
+
+
+// Actions for ENCODER_BUTTONS
 const char actionsEncoder_Buttons[N_ENCODERS][2] = { // First key sent for each encoder_button. if other than 0, second key sent for each encoder_button
   {'5', 0},   // Reset rotation
   {'2', 0},   // Reset zoom (fit to page)
   {'e', 0}    // Toggle eraser mode
+};
+
+const char ACT_ENC_BUTTON_LABEL_1[] PROGMEM = "Reset\nrotation";
+const char ACT_ENC_BUTTON_LABEL_2[] PROGMEM = "Reset\nzoom";
+const char ACT_ENC_BUTTON_LABEL_3[] PROGMEM = "Toggle\neraser";
+
+const char* const actionsEncoder_labels[ROWS * COLS] = {
+    ACT_ENC_BUTTON_LABEL_1,
+    ACT_ENC_BUTTON_LABEL_2,
+    ACT_ENC_BUTTON_LABEL_3
 };
 
 
@@ -159,7 +189,7 @@ const char actionsEncoder_Buttons[N_ENCODERS][2] = { // First key sent for each 
 
 #define GLOBAL_MIDI_CHANNEL 1  // (1-16)
 
-enum MIDI_ACTIONS_STRUCTURE {
+enum MIDI_ACTIONS_STRUC_KEYS {
   MIDI_CHANNEL = 0,           // Channel (1-16/0=global)
   MIDI_CC_OR_NOTE,            // CC or Note (0,1)
   MIDI_MOMENTARY,             // momentary or toggle (0/1)
@@ -190,6 +220,27 @@ const byte actionsMIDI[ROWS * COLS][6] = {
  {0, 1, 0, 65, 0, 127}
 };
 
+enum MIDI_ACTIONS_STRUC_CC {
+  MIDI_CHANNEL_CC = 0,        // Channel (1-16/0=global)
+  MIDI_nCC,                   // nCC or NotePitch
+  MIDI_ValMin,                // valMinCC or noteOff
+  MIDI_ValMax                 // valMaxCC or NoteOn
+};
+
+const byte actionsMIDIEncoders[N_ENCODERS][4] = {  
+ {9, 65, 11, 96},
+ {0, 66, 33, 126},
+ {0, 67, 0, 127},
+};
+
+
+const byte actionsMIDIEncodersButtons[N_ENCODERS][6] = {   // Struct similar MIDI_ACTIONS_STRUC_KEYS
+ {5, 0, 0, 65, 11, 96},
+ {3, 1, 1, 66, 33, 126},
+ {0, 1, 0, 65, 0, 127},
+};
+
+ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 boolean testModeEnabled = true;

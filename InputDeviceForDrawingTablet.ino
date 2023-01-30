@@ -3,7 +3,7 @@
 */
 
 
-#define SETUP2USE "Setup2.h"
+#define SETUP_TO_USE "Setup1.h"
 
 
 
@@ -65,7 +65,7 @@ const int ENCODER1_BUTTON = 1;
 const int ENCODER2_BUTTON = 2;
 
 
-#include SETUP2USE    
+#include SETUP_TO_USE    
 #include "Display.h"
 #include "MIDI.h"
 
@@ -136,7 +136,7 @@ void loop() {
         switch (keypad.key[i].kstate) {                        // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
           case PRESSED:
             if (MIDImode) {
-              pressedMIDIKey(keyIndex);
+              pressedMIDIKey(actionsMIDI,keyIndex);
               break;  
             }
             
@@ -186,7 +186,7 @@ void loop() {
 
           case RELEASED:
             if (MIDImode) {
-              releasedMIDIKey(keyIndex);
+              releasedMIDIKey(actionsMIDI, keyIndex);
               break;  
             }
             
@@ -229,10 +229,15 @@ void loop() {
       if (newPositionEncoder > 1) indexUpDown = INX_ENCODER_UP;
       if (newPositionEncoder < -1) indexUpDown = INX_ENCODER_DOWN;
       if (indexUpDown != -1) {
-        Keyboard.press(actions1Encoders[nEncoder][indexUpDown]);
-        if (actions2Encoders[nEncoder][indexUpDown] != 0) {                    // if the value is other than 0, send it
-          Keyboard.press(actions2Encoders[nEncoder][indexUpDown] );
+        if (! testMode) {
+          Keyboard.press(actions1Encoders[nEncoder][indexUpDown]);
+          if (actions2Encoders[nEncoder][indexUpDown] != 0) {                    // if the value is other than 0, send it
+            Keyboard.press(actions2Encoders[nEncoder][indexUpDown] );
+          }
         }
+
+        displayKeyLabel( (indexUpDown == INX_ENCODER_UP) ? CF(actionsEncoderIncr_labels[nEncoder]) : CF(actionsEncoderDecr_labels[nEncoder]));
+        
         resetEncoderN(nEncoder);
         Keyboard.releaseAll();
       }
@@ -243,34 +248,53 @@ void loop() {
 
   // check encoder-buttons  ////////////////////////////////////////////////////////////////////////////////////////
   if (bUseEncoderButtons) {
+    int keyIndex = -1;
     encoder_buttons.update();
-  
     if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {     // 0= Detect only the first pressing
-      Keyboard.press(actionsEncoder_Buttons[0][0]);
-      if (actionsEncoder_Buttons[0][1] != 0) {                     // if the value is other than 0, send it
-        Keyboard.press(actionsEncoder_Buttons[0][1]);
+      keyIndex = 0;
+    } else if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
+      keyIndex = 1;
+    } else if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {
+      keyIndex = 2;
+    }
+
+    if (keyIndex != -1) {
+      if (MIDImode) {
+        pressedMIDIKey(actionsMIDIEncodersButtons, keyIndex);
+      } else {
+      if (! testMode) {
+        sendKeyPressed(actionsEncoder_Buttons, keyIndex);
+      }
+      displayKeyLabel( CF( actionsEncoder_labels[keyIndex]));
       }
     }
-  
-    if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
-      Keyboard.press(actionsEncoder_Buttons[1][0]);
-      if (actionsEncoder_Buttons[1][1] != 1) {
-        Keyboard.press(actionsEncoder_Buttons[1][1]);
-      }
-    }
-  
-    if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {
-      Keyboard.press(actionsEncoder_Buttons[2][0]);
-      if (actionsEncoder_Buttons[2][1] != 0) {
-        Keyboard.press(actionsEncoder_Buttons[2][1]);
-      }
-  
-    }
-  
+
     // check if some encoder_button has been depressed
-    if (encoder_buttons.onRelease(ENCODER0_BUTTON) || encoder_buttons.onRelease(ENCODER1_BUTTON) || encoder_buttons.onRelease(ENCODER2_BUTTON)) {
-      Keyboard.releaseAll();
+    keyIndex = -1;
+    if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {     
+      keyIndex = 0;
+    } else if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
+      keyIndex = 1;
+    } else if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {
+      keyIndex = 2;
     }
+    
+    if (keyIndex != -1) {
+      if (MIDImode) {                                            // MIDI mode
+        releasedMIDIKey(actionsMIDIEncodersButtons, keyIndex);
+      } else {                                                   // Keyboard
+        if (! testMode) {                                
+          sendKeyDepressed(actionsEncoder_Buttons, keyIndex);
+        }
+        clearAreaBottomDisplay(true);
+      }
+    }
+
+    
+//    if (encoder_buttons.onRelease(ENCODER0_BUTTON) || encoder_buttons.onRelease(ENCODER1_BUTTON) || encoder_buttons.onRelease(ENCODER2_BUTTON)) {
+//      Keyboard.releaseAll();
+//      clearAreaBottomDisplay(true);
+//    }
   }
   //
 

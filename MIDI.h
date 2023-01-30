@@ -59,46 +59,46 @@ void sendMIDIreset(){
   MidiUSB.flush();
 }
 
-// MIDI_CHANNEL = 0,           // Channel (1-16/0=global)
+//  MIDI_CHANNEL = 0,           // Channel (1-16/0=global)
 //  MIDI_CC_OR_NOTE,            // CC or Note (0,1)
 //  MIDI_MOMENTARY,             // momentary or toggle (0/1)
 //  MIDI_nCC_OR_NOTEPITCH,      // nCC or NotePitch
 //  MIDI_ValMin_OR_velNoteOff,  // valMinCC or noteOff
 //  MIDI_ValMax_OR_velNoteOn
 
-void pressedMIDIKey(int keyIndex){
+void pressedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
   Serial.println(F("Midi pressed")); 
-  byte channel = (actionsMIDI[keyIndex][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDI[keyIndex][0];
+  byte channel = (acts[keyIndex][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : acts[keyIndex][MIDI_CHANNEL];
 
-  if (actionsMIDI[keyIndex][MIDI_CC_OR_NOTE] == 1) {                                               // Note
+  if (acts[keyIndex][MIDI_CC_OR_NOTE] == 1) {                                               // Note
     boolean bSendNote = true;
-    byte note = actionsMIDI[keyIndex][MIDI_nCC_OR_NOTEPITCH];
-    if  (actionsMIDI[keyIndex][MIDI_MOMENTARY] != 0) {                                             // if toggle...
+    byte note = acts[keyIndex][MIDI_nCC_OR_NOTEPITCH];
+    if  (acts[keyIndex][MIDI_MOMENTARY] != 0) {                                             // if toggle...
       MIDInoteStatus[note] = ! MIDInoteStatus[note];
       bSendNote = MIDInoteStatus[note];
       if (!bSendNote) {
-        sendNoteOff_USB(note,actionsMIDI[keyIndex][MIDI_ValMin_OR_velNoteOff], channel); 
+        sendNoteOff_USB(note,acts[keyIndex][MIDI_ValMin_OR_velNoteOff], channel); 
       }
     }
     if  (bSendNote) {
-      sendNoteOn_USB(note,actionsMIDI[keyIndex][MIDI_ValMax_OR_velNoteOn], channel);      
+      sendNoteOn_USB(note,acts[keyIndex][MIDI_ValMax_OR_velNoteOn], channel);      
     }
     
   } else {                                                                                         // CC 
-    sendCtrlChange_USB(actionsMIDI[keyIndex][MIDI_nCC_OR_NOTEPITCH],actionsMIDI[keyIndex][MIDI_ValMax_OR_velNoteOn], channel);  
+    sendCtrlChange_USB(acts[keyIndex][MIDI_nCC_OR_NOTEPITCH],acts[keyIndex][MIDI_ValMax_OR_velNoteOn], channel);  
   }
 }
 
 
 
-void releasedMIDIKey(int keyIndex){
+void releasedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
   Serial.println(F("Midi released")); 
-  byte channel = (actionsMIDI[keyIndex][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDI[keyIndex][0];
-  if (actionsMIDI[keyIndex][MIDI_CC_OR_NOTE] == 1) {                                                // Note
-    if  (actionsMIDI[keyIndex][MIDI_MOMENTARY] == 0) {                                              // Send NoteOff only if 'momentary' mode for this note
-      sendNoteOff_USB(actionsMIDI[keyIndex][MIDI_nCC_OR_NOTEPITCH],actionsMIDI[keyIndex][MIDI_ValMin_OR_velNoteOff], channel);      
+  byte channel = (acts[keyIndex][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : acts[keyIndex][MIDI_CHANNEL];
+  if (acts[keyIndex][MIDI_CC_OR_NOTE] == 1) {                                                // Note
+    if  (acts[keyIndex][MIDI_MOMENTARY] == 0) {                                              // Send NoteOff only if 'momentary' mode for this note
+      sendNoteOff_USB(acts[keyIndex][MIDI_nCC_OR_NOTEPITCH],acts[keyIndex][MIDI_ValMin_OR_velNoteOff], channel);      
     }
   } else {                                                                                          // CC
-    sendCtrlChange_USB(actionsMIDI[keyIndex][MIDI_nCC_OR_NOTEPITCH],actionsMIDI[keyIndex][MIDI_ValMin_OR_velNoteOff], channel);   
+    sendCtrlChange_USB(acts[keyIndex][MIDI_nCC_OR_NOTEPITCH],acts[keyIndex][MIDI_ValMin_OR_velNoteOff], channel);   
   }
 }

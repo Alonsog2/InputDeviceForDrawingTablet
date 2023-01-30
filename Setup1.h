@@ -5,14 +5,17 @@
 // PINs 2,3 are used by Wire library (SDA, SCL in Display)
 boolean bUseDisplay = false;
 
-boolean bUseMIDI =false;
-#define START_IN_MIDI_MODE false;
+boolean bUseRotaryEncoders = true;
+boolean bUseEncoderButtons = true;
+
+boolean bUseMIDI =true;
+#define START_IN_MIDI_MODE true;
 
 #define pin_LED_Status A2
 
 #define pin_LED_TestMode A2
-
 boolean bUseLEDTestMode = false;
+
 
 ///////////////////////////////////////////////////////////////////// 4x4 Keyboard /////////////////////////////////////////
 
@@ -21,6 +24,7 @@ byte rowPins[ROWS] = {7, 8, 9, 10}; //rows
 byte colPins[COLS] = {3, 4, 5, 6};  //columns
 
 int index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
+int index_SwitchMIDIKey = 12;               // index of key for changing to MIDI mode with longPress (system must be in textMode)
 
 // Actions for 4x4 keyboard
 const char actions[ROWS * COLS][2] = {  // code sent when a key is pressed. if second value is other than 0 send it
@@ -140,15 +144,105 @@ const char actions2Encoders[N_ENCODERS][2] = {       // second code to send, if 
   {0,  0}
 };
 
+const char ACT_ENC_INCR_LABEL_1[] PROGMEM = "Rotation\nRIGHT";
+const char ACT_ENC_INCR_LABEL_2[] PROGMEM = "Rotation\nIN";
+const char ACT_ENC_INCR_LABEL_3[] PROGMEM = "Brush\nsize +";
 
-// Actions for encoder_buttons
+const char* const actionsEncoderIncr_labels[ROWS * COLS] = {
+    ACT_ENC_INCR_LABEL_1,
+    ACT_ENC_INCR_LABEL_2,
+    ACT_ENC_INCR_LABEL_3
+};
+
+const char ACT_ENC_DECR_LABEL_1[] PROGMEM = "Rotation\nLEFT";
+const char ACT_ENC_DECR_LABEL_2[] PROGMEM = "Rotation\nOUT";
+const char ACT_ENC_DECR_LABEL_3[] PROGMEM = "Brush\nsize -";
+
+const char* const actionsEncoderDecr_labels[ROWS * COLS] = {
+    ACT_ENC_DECR_LABEL_1,
+    ACT_ENC_DECR_LABEL_2,
+    ACT_ENC_DECR_LABEL_3
+};
+
+
+
+// Actions for ENCODER_BUTTONS
 const char actionsEncoder_Buttons[N_ENCODERS][2] = { // First key sent for each encoder_button. if other than 0, second key sent for each encoder_button
   {'5', 0},   // Reset rotation
   {'2', 0},   // Reset zoom (fit to page)
   {'e', 0}    // Toggle eraser mode
 };
 
+const char ACT_ENC_BUTTON_LABEL_1[] PROGMEM = "Reset\nrotation";
+const char ACT_ENC_BUTTON_LABEL_2[] PROGMEM = "Reset\nzoom";
+const char ACT_ENC_BUTTON_LABEL_3[] PROGMEM = "Toggle\neraser";
 
+const char* const actionsEncoder_labels[ROWS * COLS] = {
+    ACT_ENC_BUTTON_LABEL_1,
+    ACT_ENC_BUTTON_LABEL_2,
+    ACT_ENC_BUTTON_LABEL_3
+};
+
+
+
+////////////////////////////////////////////////////////// MIDI /////////////////////////////////////////////////////////
+
+#define GLOBAL_MIDI_CHANNEL 1  // (1-16)
+
+enum MIDI_ACTIONS_STRUC_KEYS {
+  MIDI_CHANNEL = 0,            // Channel (1-16/0=global)
+  MIDI_CC_OR_NOTE,             // CC or Note (0,1)
+  MIDI_MOMENTARY,              // momentary or toggle (0/1)
+  MIDI_nCC_OR_NOTEPITCH,       // nCC or NotePitch
+  MIDI_ValMin_OR_velNoteOff,   // valMinCC or noteOff
+  MIDI_ValMax_OR_velNoteOn,    // valMaxCC or NoteOn
+  MIDI_ACTIONS_STRUC_KEYS_cont // only for count the elements in the enum
+};
+
+const byte actionsMIDI[ROWS * COLS][MIDI_ACTIONS_STRUC_KEYS_cont] = {  
+ {9, 0, 0, 65, 11, 96},
+ {0, 1, 1, 66, 33, 126},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 65, 0, 127}
+};
+
+enum MIDI_ACTIONS_STRUC_CC {
+  MIDI_CHANNEL_CC = 0,        // Channel (1-16/0=global)
+  MIDI_nCC,                   // nCC or NotePitch
+  MIDI_ValMin,                // valMinCC or noteOff
+  MIDI_ValMax                 // valMaxCC or NoteOn
+};
+
+const byte actionsMIDIEncoders[N_ENCODERS][4] = {  
+ {9, 65, 11, 96},
+ {0, 66, 33, 126},
+ {0, 67, 0, 127}
+};
+
+
+const byte actionsMIDIEncodersButtons[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_cont] = {   // Struct similar MIDI_ACTIONS_STRUC_KEYS
+ {5, 0, 0, 67, 22, 100},
+ {3, 1, 1, 68, 33, 126},
+ {0, 1, 0, 69, 0, 127}
+};
+
+
+ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 boolean testModeEnabled = true;
