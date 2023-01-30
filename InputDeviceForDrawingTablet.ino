@@ -180,7 +180,6 @@ void loop() {
               localShiftMode = NO_LOCAL_SHIFT;                           // After enter or exit testMode, always return to NO_LOCAL_SHIFT modee2
               testMode= !testMode;
               displayStatus();
-              //refreshLEDs_Status();
             }
             break;
 
@@ -229,24 +228,37 @@ void loop() {
       if (newPositionEncoder > 1) indexUpDown = INX_ENCODER_UP;
       if (newPositionEncoder < -1) indexUpDown = INX_ENCODER_DOWN;
       if (indexUpDown != -1) {
-        if (! testMode) {
-          Keyboard.press(actions1Encoders[nEncoder][indexUpDown]);
-          if (actions2Encoders[nEncoder][indexUpDown] != 0) {                    // if the value is other than 0, send it
-            Keyboard.press(actions2Encoders[nEncoder][indexUpDown] );
+        if (MIDImode) { // MIDI  
+          byte channel = (actionsMIDIEncoders[nEncoder][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[nEncoder][MIDI_CHANNEL];
+          byte value = MIDIvalRotaryEncoders[nEncoder];
+          if (indexUpDown == INX_ENCODER_UP && value < actionsMIDIEncoders[nEncoder][MIDI_ValMax]) value++;
+          if (indexUpDown == INX_ENCODER_DOWN && value > actionsMIDIEncoders[nEncoder][MIDI_ValMin]) value--; 
+          MIDIvalRotaryEncoders[nEncoder] = value;
+          sendCtrlChange_USB(actionsMIDIEncoders[nEncoder][MIDI_nCC], value, channel);
+         // End MIDI
+          
+        } else { // Keyboard
+          if (! testMode) {
+            Keyboard.press(actions1Encoders[nEncoder][indexUpDown]);
+            if (actions2Encoders[nEncoder][indexUpDown] != 0) {                    // if the value is other than 0, send it
+              Keyboard.press(actions2Encoders[nEncoder][indexUpDown] );
+            }
           }
-        }
-
-        displayKeyLabel( (indexUpDown == INX_ENCODER_UP) ? CF(actionsEncoderIncr_labels[nEncoder]) : CF(actionsEncoderDecr_labels[nEncoder]));
+  
+          displayKeyLabel( (indexUpDown == INX_ENCODER_UP) ? CF(actionsEncoderIncr_labels[nEncoder]) : CF(actionsEncoderDecr_labels[nEncoder]));
+          
+          Keyboard.releaseAll();
+        // End Keyboard  
+        }  
         
         resetEncoderN(nEncoder);
-        Keyboard.releaseAll();
       }
     }
   }
   //
 
 
-  // check encoder-buttons  ////////////////////////////////////////////////////////////////////////////////////////
+  // check ENCODER_BUTTONS  ////////////////////////////////////////////////////////////////////////////////////////
   if (bUseEncoderButtons) {
     int keyIndex = -1;
     encoder_buttons.update();
