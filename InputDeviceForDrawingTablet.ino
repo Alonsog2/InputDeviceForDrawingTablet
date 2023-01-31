@@ -6,7 +6,6 @@
 #define SETUP_TO_USE "Setup1.h"
 
 
-
 ///////////////////////////////////////////////////////////////////////////////   4X4 keyboard   ///////////////////////////////////////////////////////
 
 #include <Keyboard.h>               // library for USB communication
@@ -91,7 +90,7 @@ void setup() {
     initDisplay();
   }
 
-  if (bUseMIDI) {
+  if (DeviceModel != KEYBOARD_ONLY) {
     initMIDI();
   }
 

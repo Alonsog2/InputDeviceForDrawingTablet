@@ -113,3 +113,38 @@ void displayStatus() {
     Serial.println(msg);
   }
 }
+
+
+
+void displayMIDIInfo(byte cmd, byte Data1, byte Data2, byte channel){
+  String msg;
+  if (cmd == 0xB0) {                       // CC message
+    msg = "CC Ch" +String(channel);
+    msg = msg + "\nCtrl ";
+    msg = msg + String(Data1);
+    msg = msg + "\nVal ";
+  } else {
+    msg = "N." + String((cmd == 0x80) ? "OFF" : "ON");
+    msg = msg + " Ch";
+    msg = msg + String(channel);
+    msg = msg + "\nNote ";
+    msg = msg + String(Data1);
+    msg = msg + "\nVel ";
+  }
+  msg = msg + String(Data2);
+Serial.println(msg);
+  
+  if (displayPresent) {
+    clearAreaBottomDisplay();
+    display.setCursor(0, INIT_LINE_AREA2);
+    display.print(msg);
+    display.display();
+  }
+
+  if (testMode) {
+    if (sendInfoToComputerInTestMode) {
+      Keyboard.println(msg);
+    }
+    Serial.println(msg);
+  }
+}

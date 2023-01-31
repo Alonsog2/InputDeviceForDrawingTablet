@@ -6,7 +6,7 @@
 #define MIDIVALUE_CTRL   64  // Valor del controlador On
 
 
-boolean MIDImode = START_IN_MIDI_MODE;
+boolean MIDImode = ((DeviceModel == MIDI_ONLY) || (DeviceModel == MIDI_AND_KEYBOARD));
 
 
 boolean MIDInoteStatus[128] = {  
@@ -28,6 +28,8 @@ byte MIDIvalRotaryEncoders[N_ENCODERS] = {
 };
 
 
+const char NOTE_NAMES[] PROGMEM = "C C#D D#E F F#G G#A A#B ";
+
 
 void initCCvalues_Encoders(){
   for (int i = 0; i<N_ENCODERS; i++) {
@@ -39,25 +41,28 @@ void initCCvalues_Encoders(){
 
 
 void sendNoteOn_USB(byte pitch, byte velocity, byte channel) {               // enviar notaOn al PC por USB del Leonardo
-  midiEventPacket_t midiPack = {0x09, 0x90 | (--channel), pitch, velocity};  // MIDIUSB numera los canales del 0 al 15
+  midiEventPacket_t midiPack = {0x09, 0x90 | (channel-1), pitch, velocity};  // MIDIUSB numera los canales del 0 al 15
   MidiUSB.sendMIDI(midiPack);
   MidiUSB.flush();
+  displayMIDIInfo(0x90, pitch, velocity, channel);
 }
 
 
 
 void sendNoteOff_USB(byte pitch, byte velocity, byte channel ) {            // enviar notaOff al PC por USB del Leonardo
-  midiEventPacket_t midiPack = {0x08, 0x80 | (--channel), pitch, velocity}; // MIDIUSB numera los canales del 0 al 15
+  midiEventPacket_t midiPack = {0x08, 0x80 | (channel-1), pitch, velocity}; // MIDIUSB numera los canales del 0 al 15
   MidiUSB.sendMIDI(midiPack);
   MidiUSB.flush();
+  displayMIDIInfo(0x80, pitch, velocity, channel);
 }
 
 
 
 void sendCtrlChange_USB(byte control, byte value, byte channel) {
-  midiEventPacket_t event = {0x0B, 0xB0 | (--channel), control, value};     // MIDIUSB numera los canales del 0 al 15
+  midiEventPacket_t event = {0x0B, 0xB0 | (channel-1), control, value};     // MIDIUSB numera los canales del 0 al 15
   MidiUSB.sendMIDI(event);
   MidiUSB.flush();
+  displayMIDIInfo(0xB0, control, value, channel);
 }
 
 

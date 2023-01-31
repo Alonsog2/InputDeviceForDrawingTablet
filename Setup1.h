@@ -2,18 +2,23 @@
 // Setup1 (Define in the main tab the "SetupX.h" to use)
 //
 
-// PINs 2,3 are used by Wire library (SDA, SCL in Display)
-boolean bUseDisplay = false;
+enum DEVICE_MODELS {
+  KEYBOARD_ONLY,
+  MIDI_ONLY,
+  KEYBOARD_AND_MIDI,                  // Starts in keyboard mode but allows switch to MIDI  
+  MIDI_AND_KEYBOARD                   // Starts in MIDI mode but allows switch to keyboard
+};
+
+int DeviceModel = MIDI_ONLY;
+
+boolean bUseDisplay = false;          // PINs 2,3 are used by Wire library (SDA, SCL in Display)
 
 boolean bUseRotaryEncoders = true;
 boolean bUseEncoderButtons = true;
 
-boolean bUseMIDI =true;
-#define START_IN_MIDI_MODE false;
 
 #define pin_LED_Status A2
-
-#define pin_LED_TestMode A2
+#define pin_LED_TestMode A1
 boolean bUseLEDTestMode = false;
 
 
@@ -187,7 +192,7 @@ const char* const actionsEncoder_labels[ROWS * COLS] = {
 
 ////////////////////////////////////////////////////////// MIDI /////////////////////////////////////////////////////////
 
-#define GLOBAL_MIDI_CHANNEL 1  // (1-16)
+#define GLOBAL_MIDI_CHANNEL 16  // (1-16)
 
 enum MIDI_ACTIONS_STRUC_KEYS {
   MIDI_CHANNEL = 0,            // Channel (1-16/0=global)
