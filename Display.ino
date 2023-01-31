@@ -26,7 +26,6 @@ void initDisplay() {
     display.setTextSize(2);
     display.setTextColor(SSD1306_WHITE);
     display.cp437(true);                                     // Use full 256 char 'Code Page 437' font
-
     displayStatus();
   }
 }
@@ -83,7 +82,7 @@ void displayStatus() {
   } else {
     switch (localShiftMode) {
       case LOCAL_SHIFT_TEMP:
-        msg = "Temp.SHIFT";
+        msg = "Tmp.SHIFT";
         break;
       case LOCAL_SHIFT_LOCKED:
         msg = "SHIFT";
@@ -92,7 +91,7 @@ void displayStatus() {
   }
 
   if (MIDImode) {
-    msg="MIDI mode";
+    msg="MIDI";
     if (displayPresent) {
       display.clearDisplay();
     }
@@ -117,34 +116,35 @@ void displayStatus() {
 
 
 void displayMIDIInfo(byte cmd, byte Data1, byte Data2, byte channel){
-  String msg;
-  if (cmd == 0xB0) {                       // CC message
-    msg = "CC Ch" +String(channel);
-    msg = msg + "\nCtrl ";
-    msg = msg + String(Data1);
-    msg = msg + "\nVal ";
-  } else {
-    msg = "N." + String((cmd == 0x80) ? "OFF" : "ON");
-    msg = msg + " Ch";
-    msg = msg + String(channel);
-    msg = msg + "\nNote ";
-    msg = msg + String(Data1);
-    msg = msg + "\nVel ";
-  }
-  msg = msg + String(Data2);
-Serial.println(msg);
-  
   if (displayPresent) {
-    clearAreaBottomDisplay();
     display.setCursor(0, INIT_LINE_AREA2);
-    display.print(msg);
+    clearAreaBottomDisplay();
+    if (cmd == 0xB0) {                       // CC message
+      display.print(F("CC Ch"));
+      display.print(channel);
+      display.print(F("\nCtrl "));
+      display.print(Data1);
+      display.print(F("\nVal "));
+      display.print(Data2);
+    } else {
+      display.print(F("N. Ch"));
+      display.print(channel);
+      display.print(F("\nNote "));
+      notePitch2Notation(Data1);                 // fill buffer with notation
+      display.print(buffNotation); 
+      display.print(F("\nVel "));
+      display.print(Data2);
+    }
     display.display();
   }
 
-  if (testMode) {
-    if (sendInfoToComputerInTestMode) {
-      Keyboard.println(msg);
-    }
-    Serial.println(msg);
+  if (testMode || true) {
+    Serial.print (F("Midi cmd Hex "));
+    Serial.println(cmd,HEX);
+    Serial.print(F("Ch: "));
+    Serial.println(channel);
+    Serial.println(Data1);
+    Serial.println(Data2);
   }
+    
 }

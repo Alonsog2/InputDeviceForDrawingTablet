@@ -1,18 +1,23 @@
 //
-// Setup2 (Define in the main tab the "SetupX.h" to use)
+// Setup1 (Define in the main tab the "SetupX.h" to use)
 //
 
-// PINs 2,3 are used by Wire library (SDA, SCL in Display)
-boolean bUseDisplay = true;
+enum DEVICE_MODELS {
+  KEYBOARD_ONLY,
+  MIDI_ONLY,
+  KEYBOARD_AND_MIDI,                  // Starts in keyboard mode but allows switch to MIDI  
+  MIDI_AND_KEYBOARD                   // Starts in MIDI mode but allows switch to keyboard
+};
+
+int DeviceModel = MIDI_ONLY;
+
+boolean bUseDisplay = true;          // PINs 2,3 are used by Wire library (SDA, SCL in Display)
 
 boolean bUseRotaryEncoders = false;
 boolean bUseEncoderButtons = false;
 
-boolean bUseMIDI =true;
-#define START_IN_MIDI_MODE false;
 
 #define pin_LED_Status A2
-
 #define pin_LED_TestMode A1
 boolean bUseLEDTestMode = true;
 
@@ -187,32 +192,33 @@ const char* const actionsEncoder_labels[ROWS * COLS] = {
 
 ////////////////////////////////////////////////////////// MIDI /////////////////////////////////////////////////////////
 
-#define GLOBAL_MIDI_CHANNEL 1  // (1-16)
+#define GLOBAL_MIDI_CHANNEL 16  // (1-16)
 
 enum MIDI_ACTIONS_STRUC_KEYS {
-  MIDI_CHANNEL = 0,           // Channel (1-16/0=global)
-  MIDI_CC_OR_NOTE,            // CC or Note (0,1)
-  MIDI_MOMENTARY,             // momentary or toggle (0/1)
-  MIDI_nCC_OR_NOTEPITCH,      // nCC or NotePitch
-  MIDI_ValMin_OR_velNoteOff,  // valMinCC or noteOff
-  MIDI_ValMax_OR_velNoteOn    // valMaxCC or NoteOn
+  MIDI_CHANNEL = 0,            // Channel (1-16/0=global)
+  MIDI_CC_OR_NOTE,             // CC or Note (0,1)
+  MIDI_MOMENTARY,              // momentary or toggle (0/1)
+  MIDI_nCC_OR_NOTEPITCH,       // nCC or NotePitch
+  MIDI_ValMin_OR_velNoteOff,   // valMinCC or noteOff
+  MIDI_ValMax_OR_velNoteOn,    // valMaxCC or NoteOn
+  MIDI_ACTIONS_STRUC_KEYS_cont // only for count the elements in the enum
 };
 
-const byte actionsMIDI[ROWS * COLS][6] = {  
- {9, 0, 0, 65, 11, 96},
- {0, 1, 1, 66, 33, 126},
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
+const byte actionsMIDI[ROWS * COLS][MIDI_ACTIONS_STRUC_KEYS_cont] = {  
+ {9, 0, 0, 33, 11, 96},
+ {0, 1, 1, 0, 33, 126},
+ {0, 1, 0, 1, 0, 127},
+ {0, 1, 0, 2, 0, 127},
 
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 12, 0, 127},
+ {0, 1, 0, 13, 0, 127},
+ {0, 1, 0, 14, 0, 127},
+ {0, 1, 0, 15, 0, 127},
 
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
+ {0, 1, 0, 120, 0, 127},
+ {0, 1, 0, 121, 0, 127},
+ {0, 1, 0, 122, 0, 127},
+ {0, 1, 0, 123, 0, 127},
 
  {0, 1, 0, 65, 0, 127},
  {0, 1, 0, 65, 0, 127},
@@ -230,15 +236,16 @@ enum MIDI_ACTIONS_STRUC_CC {
 const byte actionsMIDIEncoders[N_ENCODERS][4] = {  
  {9, 65, 11, 96},
  {0, 66, 33, 126},
- {0, 67, 0, 127},
+ {0, 67, 0, 127}
 };
 
 
-const byte actionsMIDIEncodersButtons[N_ENCODERS][6] = {   // Struct similar MIDI_ACTIONS_STRUC_KEYS
- {5, 0, 0, 65, 11, 96},
- {3, 1, 1, 66, 33, 126},
- {0, 1, 0, 65, 0, 127},
+const byte actionsMIDIEncodersButtons[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_cont] = {   // Struct similar MIDI_ACTIONS_STRUC_KEYS
+ {5, 0, 0, 67, 22, 100},
+ {3, 1, 1, 68, 33, 126},
+ {0, 1, 0, 69, 0, 127}
 };
+
 
  
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -28,7 +28,8 @@ byte MIDIvalRotaryEncoders[N_ENCODERS] = {
 };
 
 
-const char NOTE_NAMES[] PROGMEM = "C C#D D#E F F#G G#A A#B ";
+const char NOTE_NAMES[] = "C C#D D#E F F#G G#A A#B ";
+char buffNotation[] = "1234";                                    // I.E. C#-1
 
 
 void initCCvalues_Encoders(){
@@ -84,7 +85,7 @@ void sendMIDIreset(){
 //  MIDI_ValMax_OR_velNoteOn
 
 void pressedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
-  Serial.println(F("Midi pressed")); 
+  //Serial.println(F("Midi pressed")); 
   byte channel = (acts[keyIndex][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : acts[keyIndex][MIDI_CHANNEL];
 
   if (acts[keyIndex][MIDI_CC_OR_NOTE] == 1) {                                               // Note
@@ -109,7 +110,7 @@ void pressedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
 
 
 void releasedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
-  Serial.println(F("Midi released")); 
+  //Serial.println(F("Midi released")); 
   byte channel = (acts[keyIndex][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : acts[keyIndex][MIDI_CHANNEL];
   if (acts[keyIndex][MIDI_CC_OR_NOTE] == 1) {                                                // Note
     if  (acts[keyIndex][MIDI_MOMENTARY] == 0) {                                              // Send NoteOff only if 'momentary' mode for this note
@@ -119,6 +120,22 @@ void releasedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
     sendCtrlChange_USB(acts[keyIndex][MIDI_nCC_OR_NOTEPITCH],acts[keyIndex][MIDI_ValMin_OR_velNoteOff], channel);   
   }
 }
+
+
+
+void  notePitch2Notation(byte pitch) {
+  byte inx = 0;
+  int octave = (pitch / 12) -1;           // octave from -1 to 9
+  byte indexNote = (pitch % 12) *2 ;      // notes form 0=C to 11=B (the second char can be the sharp "#")
+  buffNotation[inx++] = NOTE_NAMES[indexNote];
+  buffNotation[inx++] = NOTE_NAMES[indexNote+1];
+  if (octave < 0) {
+    buffNotation[inx++] = '-';
+  }
+  buffNotation[inx++] = char(48+abs(octave));
+  buffNotation[inx++] = 0;                // end string
+}
+
 
 
 void initMIDI() {

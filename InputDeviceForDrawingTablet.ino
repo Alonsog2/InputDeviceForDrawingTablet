@@ -3,8 +3,10 @@
 */
 
 
-#define SETUP_TO_USE "Setup1.h"
+#define SETUP_TO_USE "Setup2.h"
 
+
+#define CF(s) ((const __FlashStringHelper *)s)
 
 ///////////////////////////////////////////////////////////////////////////////   4X4 keyboard   ///////////////////////////////////////////////////////
 
@@ -70,8 +72,6 @@ const int ENCODER2_BUTTON = 2;
 #include "MIDI.h"
 
 
-#define CF(s) ((const __FlashStringHelper *)s)
-
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 // make an AnalogMultiButton object, pass in the pin, total and values array
@@ -84,14 +84,14 @@ boolean testMode = false;
 void setup() {
   Serial.begin(115200);
   delay(3000);
-  Serial.println(F("Starting..."));
-
-  if (bUseDisplay) {
-    initDisplay();
-  }
+  Serial.println(F("Init"));
 
   if (DeviceModel != KEYBOARD_ONLY) {
     initMIDI();
+  }
+  
+  if (bUseDisplay) {
+    initDisplay();
   }
 
   //Switch off the serial port leds
@@ -110,9 +110,7 @@ void setup() {
 
   Keyboard.begin();
 
-  Serial.println(F("FinSetup"));
-  Serial.println(MIDImode);
-
+  Serial.println(F("EndSetup"));
 }
 
 
@@ -208,7 +206,7 @@ void loop() {
     }
   }
   refreshLEDs_Status();
-
+  return;
 
   // check the ENCODERS
   if (bUseRotaryEncoders) {
