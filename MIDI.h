@@ -76,7 +76,7 @@ void sendMIDIreset(){
 
 
 
-// enum defined in Setups/////////////////////////////////
+//enum defined in Setups/////////////////////////////////
 //  MIDI_CHANNEL = 0,           // Channel (1-16/0=global)
 //  MIDI_CC_OR_NOTE,            // CC or Note (0,1)
 //  MIDI_MOMENTARY,             // momentary or toggle (0/1)

@@ -7,9 +7,9 @@ enum DEVICE_MODELS {
   MIDI_ONLY,
   KEYBOARD_AND_MIDI,                  // Starts in keyboard mode but allows switch to MIDI  
   MIDI_AND_KEYBOARD                   // Starts in MIDI mode but allows switch to keyboard
-};
+};                                    // Long press EncoderButton number 0 switch mode
 
-int DeviceModel = MIDI_ONLY;
+int DeviceModel = KEYBOARD_AND_MIDI;
 
 boolean bUseDisplay = false;          // PINs 2,3 are used by Wire library (SDA, SCL in Display)
 
@@ -29,7 +29,6 @@ byte rowPins[ROWS] = {7, 8, 9, 10}; //rows
 byte colPins[COLS] = {3, 4, 5, 6};  //columns
 
 int index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
-int index_SwitchMIDIKey = 12;               // index of key for changing to MIDI mode with longPress (system must be in textMode)
 
 // Actions for 4x4 keyboard
 const char actions[ROWS * COLS][2] = {  // code sent when a key is pressed. if second value is other than 0 send it

@@ -73,25 +73,25 @@ void displayKeyLabel(String label) {
 
 
 void displayStatus() {
-  String msg = MSG_NORMAL_MODE;
+  char msg[11] = MSG_NORMAL_MODE;
   if (testMode) {
-    msg = "Test";
+    strcpy(msg, "Test");
     if (localShiftMode != NO_LOCAL_SHIFT) {
-      msg += " SHIFT";
+      strcpy(msg + 4," SHIFT");
     }
   } else {
     switch (localShiftMode) {
       case LOCAL_SHIFT_TEMP:
-        msg = "Tmp.SHIFT";
+        strcpy(msg,"Tmp.SHIFT");
         break;
       case LOCAL_SHIFT_LOCKED:
-        msg = "SHIFT";
+        strcpy(msg,"SHIFT");
         break;
     }
   }
 
   if (MIDImode) {
-    msg="MIDI";
+    strcpy(msg,"MIDI");
     if (displayPresent) {
       display.clearDisplay();
     }
@@ -105,15 +105,14 @@ void displayStatus() {
   }
 
   if (testMode) {
-    msg = "Status " + msg;
     if (sendInfoToComputerInTestMode) {
+      Keyboard.print(F("Status "));
       Keyboard.println(msg);
     }
+    Serial.print(F("Status "));
     Serial.println(msg);
   }
 }
-
-
 
 void displayMIDIInfo(byte cmd, byte Data1, byte Data2, byte channel){
   if (displayPresent) {
