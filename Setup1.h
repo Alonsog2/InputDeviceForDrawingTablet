@@ -25,13 +25,13 @@ boolean bUseLEDTestMode = false;
 ///////////////////////////////////////////////////////////////////// 4x4 Keyboard /////////////////////////////////////////
 
 // pins to use in 4x4 keyboard
-byte rowPins[ROWS] = {7, 8, 9, 10}; //rows
-byte colPins[COLS] = {3, 4, 5, 6};  //columns
+byte rowPins[ROWS] = {7, 8, 9, 10};         //rows
+byte colPins[COLS] = {3, 4, 5, 6};          //columns
 
 int index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
 
 // Actions for 4x4 keyboard
-const char actions[ROWS * COLS][2] = {  // code sent when a key is pressed. if second value is other than 0 send it
+const char actions[ROWS * COLS][2] = {      // code sent when a key is pressed. if second value is other than 0 send it
   {'q', 0},            {'t', 0},             {KEY_LEFT_CTRL, 'd'},{'|', 0},
   {KEY_TAB, 0},        {'s', 0},             {'r', 0},            {KEY_BACKSPACE, 0},
   {KEY_LEFT_SHIFT, 0}, {'N', 0},             {'z', 0},            {KEY_LEFT_CTRL, ' '},
@@ -136,13 +136,13 @@ Encoder myEnc2(1, 15);
 const int ENCODER_BUTTONS_ANALOG_PIN = A3;
 
 // Actions for rotary encoders
-const char actions1Encoders[N_ENCODERS][2] = {       // Codes sent by the encoders (index [n][INX_ENCODER_UP]=UP or index [n][INX_ENCODER_DOWN]=DOWN)
+const char actions1Encoders[N_ENCODERS][2] = { // Codes sent by the encoders (index [n][INX_ENCODER_UP]=UP or index [n][INX_ENCODER_DOWN]=DOWN)
   {'4',  '6'},                                 // Rotation
   {222,  223},                                 // 223=+ 222=-  Zoom
   {'7',  '9'}                                  // Brush size (not standard krita shortcut. Must be assigned in krita too)
 };
 
-const char actions2Encoders[N_ENCODERS][2] = {       // second code to send, if needed (the value is other than 0)
+const char actions2Encoders[N_ENCODERS][2] = { // second code to send, if needed (the value is other than 0)
   {0,  0},
   {0,  0}, 
   {0,  0}

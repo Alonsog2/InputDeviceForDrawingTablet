@@ -34,6 +34,7 @@ LOCAL_SHIFT_MODES localShiftMode = NO_LOCAL_SHIFT;
 #define millis_LED_TestMode_High 50
 #define millis_LED_TestMode_Low 900
 #define millis_LED_MidiMode 1000
+#define millis_LONG_PRESS_SwitchMIDImode 3000  
 long lastMillis_LED_Status = 0;
 
 char key;
@@ -251,14 +252,14 @@ void loop() {
     encoder_buttons.update();
 
     // Check possible switch Keyboard/MIDI mode //////////////////////////////////
-    if (DeviceModel == KEYBOARD_AND_MIDI || DeviceModel == MIDI_AND_KEYBOARD) {  // Device can switch between Keyboard and MIDI ?
-      if (encoder_buttons.onPressAfter(ENCODER0_BUTTON,3000)) {                  // The defined enconder for switching is pressed more than xxxx millis ?
+    if (DeviceModel == KEYBOARD_AND_MIDI || DeviceModel == MIDI_AND_KEYBOARD) {              // Device can switch between Keyboard and MIDI ?
+      if (encoder_buttons.onPressAfter(ENCODER0_BUTTON,millis_LONG_PRESS_SwitchMIDImode)) {  // The defined enconder for switching is pressed more than xxxx millis ?
         Keyboard.releaseAll();
         switchMIDIAndKeyboardMode();
       }
     } ////////////////////////////////////////////////////////////////////////////
     
-    if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {                  // 0= Detect only the first pressing
+    if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {                               // 0= Detect only the first pressing
       keyIndex = 0;
     } else if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
       keyIndex = 1;
@@ -469,6 +470,7 @@ void switchMIDIAndKeyboardMode() {
   } else {
     sendMIDIreset();
     localShiftMode == NO_LOCAL_SHIFT;                                        // refresh LED status inside 'loop'
+    testMode = false;
   }
   displayStatus();
 }
