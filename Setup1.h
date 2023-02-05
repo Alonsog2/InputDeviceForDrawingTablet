@@ -276,9 +276,9 @@ const byte actionsMIDIEncodersUP[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_count] = {
 
 
 const byte actionsMIDIEncodersButtons[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_count] = {   // Struct similar MIDI_ACTIONS_STRUC_KEYS
- {5, 0, 0, 67, 22, 100},
- {3, 1, 1, 68, 33, 126},
- {0, 1, 0, 69, 0, 127}
+ {0, 0, 0, 108, 0, 127},
+ {0, 0, 0, 109, 0, 127},
+ {0, 0, 0, 110, 0, 127}
 };
 
 
