@@ -22,7 +22,9 @@ boolean bUseEncoderButtons = true;
 boolean bUseLEDTestMode = false;
 
 
-///////////////////////////////////////////////////////////////////// 4x4 Keyboard /////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////// 4x4 Keyboard Section //////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // pins to use in 4x4 keyboard
 byte rowPins[ROWS] = {7, 8, 9, 10};         //rows
@@ -188,10 +190,11 @@ const char* const actionsEncoder_labels[ROWS * COLS] = {
 };
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////// MIDI Section//////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////// MIDI /////////////////////////////////////////////////////////
-
-#define GLOBAL_MIDI_CHANNEL 16  // (1-16)
+#define GLOBAL_MIDI_CHANNEL 1  // (1-16)
 
 enum MIDI_ACTIONS_STRUC_KEYS {
   MIDI_CHANNEL = 0,            // Channel (1-16/0=global)
@@ -200,54 +203,90 @@ enum MIDI_ACTIONS_STRUC_KEYS {
   MIDI_nCC_OR_NOTEPITCH,       // nCC or NotePitch
   MIDI_ValMin_OR_velNoteOff,   // valMinCC or noteOff
   MIDI_ValMax_OR_velNoteOn,    // valMaxCC or NoteOn
-  MIDI_ACTIONS_STRUC_KEYS_cont // only for count the elements in the enum
+  MIDI_ACTIONS_STRUC_KEYS_count // only for count the elements in the enum
 };
 
-const byte actionsMIDI[ROWS * COLS][MIDI_ACTIONS_STRUC_KEYS_cont] = {  
- {9, 0, 0, 33, 11, 96},
- {0, 1, 1, 0, 33, 126},
- {0, 1, 0, 1, 0, 127},
- {0, 1, 0, 2, 0, 127},
+const byte actionsMIDI[ROWS * COLS][MIDI_ACTIONS_STRUC_KEYS_count] = {  
+ {0, 0, 0, 64, 0, 127},
+ {0, 0, 0, 65, 0, 127},
+ {0, 0, 0, 66, 0, 127},
+ {0, 1, 0, 6, 0, 127},
 
- {0, 1, 0, 12, 0, 127},
- {0, 1, 0, 13, 0, 127},
- {0, 1, 0, 14, 0, 127},
- {0, 1, 0, 15, 0, 127},
+ {0, 0, 0, 67, 0, 127},
+ {0, 0, 0, 68, 0, 127},
+ {0, 0, 0, 69, 0, 127},
+ {0, 0, 0, 62, 0, 127},
 
- {0, 1, 0, 120, 0, 127},
- {0, 1, 0, 121, 0, 127},
- {0, 1, 0, 122, 0, 127},
- {0, 1, 0, 123, 0, 127},
+ {0, 0, 0, 70, 0, 127},
+ {0, 0, 0, 71, 0, 127},
+ {0, 0, 0, 58, 0, 127},
+ {0, 0, 0, 59, 0, 127},
 
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127},
- {0, 1, 0, 65, 0, 127}
+ {0, 0, 0, 45, 0, 127},
+ {0, 0, 0, 42, 0, 127},
+ {0, 1, 0, 46, 0, 127},
+ {0, 0, 0, 41, 0, 127}
 };
 
-enum MIDI_ACTIONS_STRUC_CC {
-  MIDI_CHANNEL_CC = 0,        // Channel (1-16/0=global)
-  MIDI_nCC,                   // nCC or NotePitch
-  MIDI_ValMin,                // valMinCC or noteOff
-  MIDI_ValMax                 // valMaxCC or NoteOn
-};
-
-const byte actionsMIDIEncoders[N_ENCODERS][4] = {  
- {9, 65, 11, 96},
- {0, 66, 33, 126},
- {0, 67, 0, 127}
+enum MIDI_ACTIONS_STRUC_ROTARIES {
+  MIDI_CHANNEL_CC = 0,             // Channel (1-16/0=global)
+  MIDI_nCC,                        // nCC 
+  MIDI_ValMin,                     // valMinCC 
+  MIDI_ValMax,                     // valMaxCC 
+  MIDI_IncrDecrStep,               // value to increment/decrement each step (1,2,3... can be very slow to transmit)
+  MIDI_ACTIONS_STRUC_ROTARIES_count // only for count the elements in the enum
 };
 
 
-const byte actionsMIDIEncodersButtons[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_cont] = {   // Struct similar MIDI_ACTIONS_STRUC_KEYS
+
+byte MIDIvalRotaryEncoders[N_ENCODERS] = {       // these store the values and are the initial values as well (if equal Up/Down)
+  64,127,120                                
+};
+
+
+
+const boolean MIDIencodersEqualUpDownCC[N_ENCODERS] = { // Indicate if the encoder uses equal CC number Up/Down, with actionsMIDIEncoders OR ...
+  false, false, false                                   // ... Up/Down events are different and then uses actionsMIDIEncodersUP or DOWN
+};
+
+
+
+const byte actionsMIDIEncoders[N_ENCODERS][MIDI_ACTIONS_STRUC_ROTARIES_count] = {  
+ {0, 10, 0, 127, 4},
+ {0, 4, 0, 127, 4},
+ {0, 7, 0, 127, 4}
+};
+
+
+
+const byte actionsMIDIEncodersDOWN[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_count] = {  
+ {0, 0, 0, 102, 0, 127},
+ {0, 0, 0, 104, 0, 127},
+ {0, 0, 0, 106, 0, 127}
+}; 
+
+
+
+const byte actionsMIDIEncodersUP[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_count] = {  
+ {0, 0, 0, 103, 0, 127},
+ {0, 0, 0, 105, 0, 127},
+ {0, 0, 0, 107, 0, 127}
+}; 
+
+
+
+const byte actionsMIDIEncodersButtons[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_count] = {   // Struct similar MIDI_ACTIONS_STRUC_KEYS
  {5, 0, 0, 67, 22, 100},
  {3, 1, 1, 68, 33, 126},
  {0, 1, 0, 69, 0, 127}
 };
 
 
- 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+/////////////////////////////////////////////// Common Section //////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 boolean testModeEnabled = true;
 boolean sendInfoToComputerInTestMode = false;

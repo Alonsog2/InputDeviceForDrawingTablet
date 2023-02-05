@@ -1,10 +1,10 @@
 
-void initCCvalues_Encoders(){
-  for (int i = 0; i<N_ENCODERS; i++) {
-    byte channel = (actionsMIDIEncoders[i][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[i][MIDI_CHANNEL];
-    MIDIvalRotaryEncoders[i] = (actionsMIDIEncoders[i][MIDI_ValMax] + actionsMIDIEncoders[i][MIDI_ValMin]) / 2 ;
-  }
-}
+//void initCCvalues_Encoders(){
+//  for (int i = 0; i<N_ENCODERS; i++) {
+//    byte channel = (actionsMIDIEncoders[i][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[i][MIDI_CHANNEL];
+//    MIDIvalRotaryEncoders[i] = (actionsMIDIEncoders[i][MIDI_ValMax] + actionsMIDIEncoders[i][MIDI_ValMin]) / 2 ;
+//  }
+//}
 
 
 
@@ -51,7 +51,7 @@ void sendMIDIreset(){
 //  MIDI_ValMin_OR_velNoteOff,  // valMinCC or noteOff
 //  MIDI_ValMax_OR_velNoteOn
 
-void pressedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
+void pressedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_count], int keyIndex){
   //Serial.println(F("Midi pressed")); 
   byte channel = (acts[keyIndex][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : acts[keyIndex][MIDI_CHANNEL];
 
@@ -76,7 +76,7 @@ void pressedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
 
 
 
-void releasedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_cont], int keyIndex){
+void releasedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_count], int keyIndex){
   //Serial.println(F("Midi released")); 
   byte channel = (acts[keyIndex][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : acts[keyIndex][MIDI_CHANNEL];
   if (acts[keyIndex][MIDI_CC_OR_NOTE] == 1) {                                                // Note
@@ -106,5 +106,5 @@ void  notePitch2Notation(byte pitch) {
 
 
 void initMIDI() {
-  initCCvalues_Encoders();
+// whatever...
 }
