@@ -2,24 +2,29 @@
 // Setup2 (Define in the main tab the "SetupX.h" to use)
 //
 
+// pins to use in 4x4 keyboard en Setup2
+//byte rowPins[ROWS] = {4,5,6,7};             //rows
+//byte colPins[COLS] = {8,9,10,A0};           //columns
+//
+// Setup1 (Define in the main tab the "SetupX.h" to use)
+//
+
 enum DEVICE_MODELS {
   KEYBOARD_ONLY,
   MIDI_ONLY,
-  KEYBOARD_AND_MIDI,                     // Starts in keyboard mode but allows switch to MIDI  
-  MIDI_AND_KEYBOARD                      // Starts in MIDI mode but allows switch to keyboard
-};                                       // Long press EncoderButton number 0 switch mode
+  KEYBOARD_AND_MIDI,                  // Starts in keyboard mode but allows switch to MIDI  
+  MIDI_AND_KEYBOARD                   // Starts in MIDI mode but allows switch to keyboard
+};                                    // Long press EncoderButton number 0 switch mode
 
-int DeviceModel = KEYBOARD_AND_MIDI;
+byte DeviceModel = KEYBOARD_AND_MIDI;
 
-boolean bUseDisplay = true;              // PINs 2,3 are used by Wire library (SDA, SCL in Display)
+boolean bUseDisplay = true;          // PINs 2,3 are used by Wire library (SDA, SCL in Display)
 
-boolean bUseRotaryEncoders = false;
+boolean bUseRotaryEncoders = true;
 boolean bUseEncoderButtons = false;
 
 
 #define pin_LED_Status A2
-#define pin_LED_TestMode A1
-boolean bUseLEDTestMode = true;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +35,7 @@ boolean bUseLEDTestMode = true;
 byte rowPins[ROWS] = {4,5,6,7};             //rows
 byte colPins[COLS] = {8,9,10,A0};           //columns
 
-int index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
+const byte index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
 
 // Actions for 4x4 keyboard
 const char actions[ROWS * COLS][2] = {      // code sent when a key is pressed. if second value is other than 0 send it
@@ -129,13 +134,14 @@ const char* const actions_LocalShift_labels[ROWS * COLS] = {
 //   Best Performance: both pins have interrupt capability
 //   Good Performance: only the first pin has interrupt capability
 //   Low Performance:  neither pin has interrupt capability
-Encoder myEnc0(2, 16);
+/////
+Encoder myEnc0(A1, 16);
 Encoder myEnc1(0, 14);
 Encoder myEnc2(1, 15);
 //   avoid using pins with LEDs attached
 
 // Analog PIN for use with the three encoder buttons
-const int ENCODER_BUTTONS_ANALOG_PIN = A3;
+const byte ENCODER_BUTTONS_ANALOG_PIN = A3;
 
 // Actions for rotary encoders
 const char actions1Encoders[N_ENCODERS][2] = { // Codes sent by the encoders (index [n][INX_ENCODER_UP]=UP or index [n][INX_ENCODER_DOWN]=DOWN)
@@ -207,26 +213,27 @@ enum MIDI_ACTIONS_STRUC_KEYS {
 };
 
 const byte actionsMIDI[ROWS * COLS][MIDI_ACTIONS_STRUC_KEYS_count] = {  
- {0, 0, 0, 64, 0, 127},
- {0, 0, 0, 65, 0, 127},
- {0, 0, 0, 66, 0, 127},
- {0, 1, 0, 6, 0, 127},
+ {0, 1, 1, 64, 0, 127},
+ {0, 1, 1, 65, 0, 127},
+ {0, 1, 1, 66, 0, 127},
+ {0, 1, 1, 67, 0, 127},
 
- {0, 0, 0, 67, 0, 127},
- {0, 0, 0, 68, 0, 127},
+ {0, 1, 0, 68, 0, 127},
  {0, 0, 0, 69, 0, 127},
- {0, 0, 0, 62, 0, 127},
-
  {0, 0, 0, 70, 0, 127},
  {0, 0, 0, 71, 0, 127},
- {0, 0, 0, 58, 0, 127},
- {0, 0, 0, 59, 0, 127},
+
+ {0, 0, 0, 62, 0, 127},
+ {0, 0, 0, 41, 0, 127},
+ {0, 1, 0, 46, 0, 127},
+ {0, 1, 0, 6, 0, 127},
 
  {0, 0, 0, 45, 0, 127},
  {0, 0, 0, 42, 0, 127},
- {0, 1, 0, 46, 0, 127},
- {0, 0, 0, 41, 0, 127}
+ {0, 0, 0, 58, 0, 127},
+ {0, 0, 0, 59, 0, 127}
 };
+
 
 enum MIDI_ACTIONS_STRUC_ROTARIES {
   MIDI_CHANNEL_CC = 0,             // Channel (1-16/0=global)

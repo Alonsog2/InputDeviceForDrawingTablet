@@ -54,7 +54,7 @@ char key;
 #include <AnalogMultiButton.h>
 
 // set how many buttons you have connected
-const int ENCODER_BUTTONS_TOTAL = N_ENCODERS;
+#define ENCODER_BUTTONS_TOTAL N_ENCODERS
 
 // find out what the value of analogRead is when you press each of your buttons and put them in this array
 // you can find this out by putting Serial.println(analogRead(ENCODER_BUTTONS_ANALOG_PIN)); in your loop() and opening the serial monitor to see the values
@@ -63,9 +63,11 @@ const int ENCODER_BUTTONS_VALUES[ENCODER_BUTTONS_TOTAL] = {0, 315, 482};
 
 // you can also define constants for each of your buttons, which makes your code easier to read
 // define these in the same order as the numbers in your BUTTONS_VALUES array, so whichever button has the smallest analogRead() number should come first
-const int ENCODER0_BUTTON = 0;
-const int ENCODER1_BUTTON = 1;
-const int ENCODER2_BUTTON = 2;
+enum ENCODER_BUTTONS{
+  ENCODER2_BUTTON = 0,
+  ENCODER1_BUTTON,
+  ENCODER0_BUTTON
+};
 
 
 #include SETUP_TO_USE
@@ -102,10 +104,6 @@ void setup() {
 
   pinMode(pin_LED_Status, OUTPUT);                       // LED for localShift indication
 
-  if (bUseLEDTestMode) {
-    pinMode(pin_LED_TestMode, OUTPUT);                   // LED for TestMode indication (If enabled in setup)
-  }
-
   refreshLEDs_Status();
 
   keypad.setDebounceTime(50);
@@ -121,7 +119,7 @@ void setup() {
 /////////////////////////////////////////////////////// loop //////////////////////////////////////////////////////////////
 
 void loop() {
-  int keyIndex;
+  byte keyIndex;
   // Fills kpd.key[ ] array with up-to 10 active keys. Returns true if there are ANY active keys.
   if (keypad.getKeys()) {
     for (int i = 0; i < LIST_MAX; i++) {                       // Scan the whole key list.
@@ -217,27 +215,27 @@ void loop() {
       if (newPositionEncoder < -1) indexUpDown = INX_ENCODER_UP;
       if (indexUpDown != -1) {
         if (MIDImode) { /////////////////////////////////////////////////////////////////// MIDI mode /////////////////////////////////////////
-          if (MIDIencodersEqualUpDownCC[nEncoder]) { // MIDI encoder EqualUpDownCC
-            byte channel = (actionsMIDIEncoders[nEncoder][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[nEncoder][MIDI_CHANNEL];
-            int value = MIDIvalRotaryEncoders[nEncoder];
-            if (indexUpDown == INX_ENCODER_UP) {
-              value += actionsMIDIEncoders[nEncoder][MIDI_IncrDecrStep];
-              if (value > actionsMIDIEncoders[nEncoder][MIDI_ValMax]) {
-                value = actionsMIDIEncoders[nEncoder][MIDI_ValMax];
-              }
-            }
-            if (indexUpDown == INX_ENCODER_DOWN) {
-              value -= actionsMIDIEncoders[nEncoder][MIDI_IncrDecrStep];
-              if (value < actionsMIDIEncoders[nEncoder][MIDI_ValMin]) {
-                value = actionsMIDIEncoders[nEncoder][MIDI_ValMin];
-              }
-            }
-  
-            MIDIvalRotaryEncoders[nEncoder] = value;
-            sendCtrlChange_USB(actionsMIDIEncoders[nEncoder][MIDI_nCC], value, channel);
-          } else { // Dual UP/DOWN 
-              pressedMIDIKey( ((indexUpDown == INX_ENCODER_DOWN) ? actionsMIDIEncodersDOWN : actionsMIDIEncodersUP ),  nEncoder);
-          }
+//          if (MIDIencodersEqualUpDownCC[nEncoder]) { // MIDI encoder EqualUpDownCC
+//            byte channel = (actionsMIDIEncoders[nEncoder][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[nEncoder][MIDI_CHANNEL];
+//            int value = MIDIvalRotaryEncoders[nEncoder];
+//            if (indexUpDown == INX_ENCODER_UP) {
+//              value += actionsMIDIEncoders[nEncoder][MIDI_IncrDecrStep];
+//              if (value > actionsMIDIEncoders[nEncoder][MIDI_ValMax]) {
+//                value = actionsMIDIEncoders[nEncoder][MIDI_ValMax];
+//              }
+//            }
+//            if (indexUpDown == INX_ENCODER_DOWN) {
+//              value -= actionsMIDIEncoders[nEncoder][MIDI_IncrDecrStep];
+//              if (value < actionsMIDIEncoders[nEncoder][MIDI_ValMin]) {
+//                value = actionsMIDIEncoders[nEncoder][MIDI_ValMin];
+//              }
+//            }
+//  
+//            MIDIvalRotaryEncoders[nEncoder] = value;
+//            sendCtrlChange_USB(actionsMIDIEncoders[nEncoder][MIDI_nCC], value, channel);
+//          } else { // Dual UP/DOWN 
+//              pressedMIDIKey( ((indexUpDown == INX_ENCODER_DOWN) ? actionsMIDIEncodersDOWN : actionsMIDIEncodersUP ),  nEncoder);
+//          }
           // End MIDI
 
         } else { ///////////////////////////////////////////////////////////////////// KEYBOARD mode /////////////////////////////////////////
@@ -377,7 +375,7 @@ void resetEncoderN(int nEncoder) {
 void refreshLEDs_Status() {
   static boolean prevStatusLed = false;
   static boolean prevStatusLed_TestMode = false;
-  static int nPulseTest = 0;
+  static byte nPulseTest = 0;
   boolean newStatusLed;
   boolean newStatusLed_TestMode;
 
@@ -387,22 +385,6 @@ void refreshLEDs_Status() {
   }
 
   if (testMode) {                                                                 // TestMode
-    if (bUseLEDTestMode) {                                                        // Using 2 LED for status (Shift and TestMode)
-      if (localShiftMode == NO_LOCAL_SHIFT) {
-        newStatusLed_TestMode = HIGH;
-      } else {
-        newStatusLed_TestMode = prevStatusLed_TestMode;
-        if (millis() > (lastMillis_LED_Status + millis_LED_LocalShift) ) {
-          lastMillis_LED_Status = millis();
-          newStatusLed_TestMode = (! prevStatusLed_TestMode);
-        }
-      }
-      digitalWrite(pin_LED_TestMode, newStatusLed_TestMode);
-      prevStatusLed_TestMode = newStatusLed_TestMode;
-      newStatusLed = LOW;
-
-
-    } else {                                                                      // Using 1 LED for status (Shift and TestMode)
       newStatusLed = prevStatusLed;
       switch (nPulseTest) {
         case 0:                                                                   // NO_LOCAL_SHIFT status -> One short blink and a large pause
@@ -436,12 +418,9 @@ void refreshLEDs_Status() {
           }
           break;
       }
-    }
-
+      
   } else {                                                                   // NO testMode (normal)
-    if (bUseLEDTestMode) {
-      digitalWrite(pin_LED_TestMode, LOW);                                   // LedTestMode Off
-    }
+
     if (localShiftMode == LOCAL_SHIFT_TEMP) {                                // if LOCAL_SHIFT_TEMP mode, blink led
       newStatusLed = prevStatusLed;
       if (millis() > (lastMillis_LED_Status + millis_LED_LocalShift) ) {
@@ -462,17 +441,12 @@ void refreshLEDs_Status() {
 void refreshLEDs_inMIDImode() {
   static boolean prevStatusLed = false;
   boolean newStatusLed;
-  if (bUseLEDTestMode) {                                // both LEDS ON;
-    digitalWrite(pin_LED_Status, HIGH);
-    digitalWrite(pin_LED_TestMode, HIGH);
-  } else {                                              // Only 1 LED, blink
-    newStatusLed = prevStatusLed;
-    if (millis() > (lastMillis_LED_Status + millis_LED_MidiMode) ) {
-      lastMillis_LED_Status = millis();
-      newStatusLed = (! newStatusLed);
-      digitalWrite(pin_LED_Status, newStatusLed);
-      prevStatusLed = newStatusLed;
-    }
+  newStatusLed = prevStatusLed;
+  if (millis() > (lastMillis_LED_Status + millis_LED_MidiMode) ) {
+    lastMillis_LED_Status = millis();
+    newStatusLed = (! newStatusLed);
+    digitalWrite(pin_LED_Status, newStatusLed);
+    prevStatusLed = newStatusLed;
   }
 }
 
@@ -481,7 +455,6 @@ void switchMIDIAndKeyboardMode() {
   MIDImode = !MIDImode;
   if (MIDImode) {
     digitalWrite(pin_LED_Status, HIGH);                                      // both LEDS ON;
-    if (bUseLEDTestMode) digitalWrite(pin_LED_TestMode, HIGH);
   } else {
     sendMIDIreset();
     localShiftMode == NO_LOCAL_SHIFT;                                        // refresh LED status inside 'loop'

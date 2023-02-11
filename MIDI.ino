@@ -1,11 +1,6 @@
-
-//void initCCvalues_Encoders(){
-//  for (int i = 0; i<N_ENCODERS; i++) {
-//    byte channel = (actionsMIDIEncoders[i][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[i][MIDI_CHANNEL];
-//    MIDIvalRotaryEncoders[i] = (actionsMIDIEncoders[i][MIDI_ValMax] + actionsMIDIEncoders[i][MIDI_ValMin]) / 2 ;
-//  }
-//}
-
+//
+// MIDI
+//
 
 
 void sendNoteOn_USB(byte pitch, byte velocity, byte channel) {               // enviar notaOn al PC por USB del Leonardo
@@ -59,8 +54,7 @@ void pressedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_count], int keyIndex){
     boolean bSendNote = true;
     byte note = acts[keyIndex][MIDI_nCC_OR_NOTEPITCH];
     if  (acts[keyIndex][MIDI_MOMENTARY] != 0) {                                             // if toggle...
-      MIDInoteStatus[note] = ! MIDInoteStatus[note];
-      bSendNote = MIDInoteStatus[note];
+      bSendNote = toggleMIDInoteStatus(note);
       if (!bSendNote) {
         sendNoteOff_USB(note,acts[keyIndex][MIDI_ValMin_OR_velNoteOff], channel); 
       }
@@ -72,6 +66,21 @@ void pressedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_count], int keyIndex){
   } else {                                                                                         // CC 
     sendCtrlChange_USB(acts[keyIndex][MIDI_nCC_OR_NOTEPITCH],acts[keyIndex][MIDI_ValMax_OR_velNoteOn], channel);  
   }
+}
+
+
+
+boolean toggleMIDInoteStatus(byte note){  // toggle state and return the new state of the note
+  byte datByte = MIDInoteStatus[note/8];
+  byte mask = 1 << (note%8);
+  boolean bNewStatusNote = ( (datByte & mask) == 0);
+  if (bNewStatusNote) {
+    datByte = datByte | mask;
+  } else {
+    datByte = datByte & (! mask);  
+  }
+  MIDInoteStatus[note/8] = datByte;
+  return bNewStatusNote;
 }
 
 
