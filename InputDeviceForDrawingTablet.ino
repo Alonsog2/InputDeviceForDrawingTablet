@@ -188,7 +188,7 @@ void loop() {
             }
 
             sendKeyDepressed( ( (localShiftMode) ? actions_LocalShift : actions), keyIndex);
-            clearAreaBottomDisplay(true);
+            clearAreaBottomDisplay();
             break;
 
             //case IDLE:
@@ -215,27 +215,27 @@ void loop() {
       if (newPositionEncoder < -1) indexUpDown = INX_ENCODER_UP;
       if (indexUpDown != -1) {
         if (MIDImode) { /////////////////////////////////////////////////////////////////// MIDI mode /////////////////////////////////////////
-//          if (MIDIencodersEqualUpDownCC[nEncoder]) { // MIDI encoder EqualUpDownCC
-//            byte channel = (actionsMIDIEncoders[nEncoder][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[nEncoder][MIDI_CHANNEL];
-//            int value = MIDIvalRotaryEncoders[nEncoder];
-//            if (indexUpDown == INX_ENCODER_UP) {
-//              value += actionsMIDIEncoders[nEncoder][MIDI_IncrDecrStep];
-//              if (value > actionsMIDIEncoders[nEncoder][MIDI_ValMax]) {
-//                value = actionsMIDIEncoders[nEncoder][MIDI_ValMax];
-//              }
-//            }
-//            if (indexUpDown == INX_ENCODER_DOWN) {
-//              value -= actionsMIDIEncoders[nEncoder][MIDI_IncrDecrStep];
-//              if (value < actionsMIDIEncoders[nEncoder][MIDI_ValMin]) {
-//                value = actionsMIDIEncoders[nEncoder][MIDI_ValMin];
-//              }
-//            }
-//  
-//            MIDIvalRotaryEncoders[nEncoder] = value;
-//            sendCtrlChange_USB(actionsMIDIEncoders[nEncoder][MIDI_nCC], value, channel);
-//          } else { // Dual UP/DOWN 
-//              pressedMIDIKey( ((indexUpDown == INX_ENCODER_DOWN) ? actionsMIDIEncodersDOWN : actionsMIDIEncodersUP ),  nEncoder);
-//          }
+          if (MIDIencodersEqualUpDownCC[nEncoder]) { // MIDI encoder EqualUpDownCC
+            byte channel = (actionsMIDIEncoders[nEncoder][MIDI_CHANNEL] == 0) ? GLOBAL_MIDI_CHANNEL : actionsMIDIEncoders[nEncoder][MIDI_CHANNEL];
+            int value = MIDIvalRotaryEncoders[nEncoder];
+            if (indexUpDown == INX_ENCODER_UP) {
+              value += actionsMIDIEncoders[nEncoder][MIDI_IncrDecrStep];
+              if (value > actionsMIDIEncoders[nEncoder][MIDI_ValMax]) {
+                value = actionsMIDIEncoders[nEncoder][MIDI_ValMax];
+              }
+            }
+            if (indexUpDown == INX_ENCODER_DOWN) {
+              value -= actionsMIDIEncoders[nEncoder][MIDI_IncrDecrStep];
+              if (value < actionsMIDIEncoders[nEncoder][MIDI_ValMin]) {
+                value = actionsMIDIEncoders[nEncoder][MIDI_ValMin];
+              }
+            }
+  
+            MIDIvalRotaryEncoders[nEncoder] = value;
+            sendCtrlChange_USB(actionsMIDIEncoders[nEncoder][MIDI_nCC], value, channel);
+          } else { // Dual UP/DOWN 
+              pressedMIDIKey( ((indexUpDown == INX_ENCODER_DOWN) ? actionsMIDIEncodersDOWN : actionsMIDIEncodersUP ),  nEncoder);
+          }
           // End MIDI
 
         } else { ///////////////////////////////////////////////////////////////////// KEYBOARD mode /////////////////////////////////////////
@@ -308,7 +308,7 @@ void loop() {
         if (! testMode) {
           sendKeyDepressed(actionsEncoder_Buttons, keyIndex);
         }
-        clearAreaBottomDisplay(true);
+        clearAreaBottomDisplay();
       }
     }
 

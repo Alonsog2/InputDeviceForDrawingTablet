@@ -1,67 +1,52 @@
-
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include "SSD1306Ascii.h"
+#include "SSD1306AsciiWire.h"
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-#define INIT_LINE_AREA2 17
+#define I2C_ADDRESS 0x3C     // 0X3C+SA0 - 0x3C or 0x3D
+#define RST_PIN -1          // Define proper RST_PIN if required.
+
+#define INIT_LINE_AREA2 2
 
 #define MSG_NORMAL_MODE "4x4Keys"
+#define MAX_COL 128
+#define MAX_ROW 64
 
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-// The pins for I2C are defined by the Wire-library.
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32 ??
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+SSD1306AsciiWire oled;
+
 
 
 void initDisplay() {
-  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) { // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-    Serial.println(F("Display alloc fail"));
-  } else {
-    Serial.println(F("DisplayOK"));
-    displayPresent = true;
-    display.clearDisplay();
-    display.setTextSize(2);
-    display.setTextColor(SSD1306_WHITE);
-    display.cp437(true);                                     // Use full 256 char 'Code Page 437' font
-    displayStatus();
-  }
+  #if RST_PIN >= 0
+    oled.begin(&Adafruit128x64, I2C_ADDRESS, RST_PIN);
+  #else // RST_PIN >= 0
+    oled.begin(&Adafruit128x64, I2C_ADDRESS);
+  #endif // RST_PIN >= 0
+
+  oled.setFont(fixed_bold10x15);
+  //oled.set2X();
+  oled.clear();
+  displayStatus();
 }
 
 
 
-void clearAreaUPDisplay(boolean refreshDisplay = false) {
-  if (displayPresent) {
-    display.fillRect(0, 0, display.width(), INIT_LINE_AREA2 - 1, SSD1306_BLACK);
-    if (refreshDisplay) {
-      display.display();
-    }
-  }
+void clearAreaUPDisplay() {
+  oled.clear(0, MAX_COL, 0, INIT_LINE_AREA2 - 1);
 }
 
 
 
-void clearAreaBottomDisplay(boolean refreshDisplay = false) {
-  if (displayPresent) {
-    display.fillRect(0, INIT_LINE_AREA2, display.width(), display.height(), SSD1306_BLACK);
-    if (refreshDisplay) {
-      display.display();
-    }
-  }
+void clearAreaBottomDisplay() {
+  oled.clear(0, MAX_COL, INIT_LINE_AREA2, MAX_ROW);
 }
 
 
 
 void displayKeyLabel(String label) {
-  if (displayPresent) {
-    clearAreaBottomDisplay();
-    display.setCursor(0, INIT_LINE_AREA2);
-    display.print(label);
-    display.display();
-  }
+  clearAreaBottomDisplay();
+  oled.setCursor(0, INIT_LINE_AREA2);
+  oled.print(label);
 
   if (testMode) {
     if (sendInfoToComputerInTestMode) {
@@ -78,32 +63,27 @@ void displayStatus() {
   if (testMode) {
     strcpy(msg, "Test");
     if (localShiftMode != NO_LOCAL_SHIFT) {
-      strcpy(msg + 4," SHIFT");
+      strcpy(msg + 4, " SHIFT");
     }
   } else {
     switch (localShiftMode) {
       case LOCAL_SHIFT_TEMP:
-        strcpy(msg,"Tmp.SHIFT");
+        strcpy(msg, "Tmp.SHIFT");
         break;
       case LOCAL_SHIFT_LOCKED:
-        strcpy(msg,"SHIFT");
+        strcpy(msg, "SHIFT");
         break;
     }
   }
 
   if (MIDImode) {
-    strcpy(msg,"MIDI");
-    if (displayPresent) {
-      display.clearDisplay();
-    }
+    strcpy(msg, "MIDI");
+    oled.clear();
   }
-  
-  if (displayPresent) {
-    clearAreaUPDisplay();
-    display.setCursor(0, 0);
-    display.print(msg);
-    display.display();
-  }
+
+  clearAreaUPDisplay();
+  oled.setCursor(0, 0);
+  oled.print(msg);
 
   if (testMode) {
     if (sendInfoToComputerInTestMode) {
@@ -115,36 +95,33 @@ void displayStatus() {
   }
 }
 
-void displayMIDIInfo(byte cmd, byte Data1, byte Data2, byte channel){
-  if (displayPresent) {
-    display.setCursor(0, INIT_LINE_AREA2);
-    clearAreaBottomDisplay();
-    if (cmd == 0xB0) {                       // CC message
-      display.print(F("CC Ch"));
-      display.print(channel);
-      display.print(F("\nCtrl "));
-      display.print(Data1);
-      display.print(F("\nVal "));
-      display.print(Data2);
-    } else {
-      display.print(F("N. Ch"));
-      display.print(channel);
-      display.print(F("\nNote "));
-      notePitch2Notation(Data1);                 // fill buffer with notation
-      display.print(buffNotation); 
-      display.print(F("\nVel "));
-      display.print(Data2);
-    }
-    display.display();
+void displayMIDIInfo(byte cmd, byte Data1, byte Data2, byte channel) {
+  oled.setCursor(0, INIT_LINE_AREA2);
+  clearAreaBottomDisplay();
+  if (cmd == 0xB0) {                       // CC message
+    oled.print(F("CC Ch"));
+    oled.print(channel);
+    oled.print(F("\nCtrl "));
+    oled.print(Data1);
+    oled.print(F("\nVal "));
+    oled.print(Data2);
+  } else {
+    oled.print(F("N. Ch"));
+    oled.print(channel);
+    oled.print(F("\nNote "));
+    notePitch2Notation(Data1);                 // fill buffer with notation
+    oled.print(buffNotation);
+    oled.print(F("\nVel "));
+    oled.print(Data2);
   }
 
   if (testMode || true) {
     Serial.print (F("Midi cmd Hex "));
-    Serial.println(cmd,HEX);
+    Serial.println(cmd, HEX);
     Serial.print(F("Ch: "));
     Serial.println(channel);
     Serial.println(Data1);
     Serial.println(Data2);
   }
-    
+
 }
