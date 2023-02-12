@@ -48,6 +48,10 @@ char key;
 #define INX_ENCODER_UP 1
 #define INX_ENCODER_DOWN 0
 
+#define MILLIS_DISPLAYING_ENCODER_INFO 600  
+boolean bEncodersMoved = false;
+long lastTimeEncoderMoved = 0;
+
 
 //////////////////////////////////////////////////////////////////////   Analog button (3 keys readed in only one analogic input)  ////////////////////////
 
@@ -81,6 +85,12 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TOTAL, ENCODER_BUTTONS_VALUES);
 
 boolean testMode = false;
+
+#define SECONDS_UNTIL_SCREENSAVER 300     // 300/60 = 5 minutes
+
+long lastTimeActionByUser = 0;
+long millisIntervalUntilScreenSaver = (long)(SECONDS_UNTIL_SCREENSAVER) * 1000;
+boolean bScreenSaverON = false;
 
 
 
@@ -124,6 +134,8 @@ void loop() {
   if (keypad.getKeys()) {
     for (int i = 0; i < LIST_MAX; i++) {                       // Scan the whole key list.
       if ( keypad.key[i].stateChanged ) {                      // Only find keys that have changed state.
+        resetTimeScreenSaver();
+        bEncodersMoved = false;
         keyIndex = keypad.key[i].kchar - char('0');            // get the index from 0 to 15
         switch (keypad.key[i].kstate) {                        // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
           case PRESSED:
@@ -146,6 +158,7 @@ void loop() {
                   break;
               }
               Keyboard.releaseAll();                         // just in case some other previous key still pressed...
+              clearAllDisplay();
               displayStatus();
               break;
             }
@@ -253,6 +266,9 @@ void loop() {
         }
 
         resetEncoderN(nEncoder);
+        resetTimeScreenSaver();
+        lastTimeEncoderMoved = millis();
+        bEncodersMoved = true;
       }
     }
   }
@@ -268,6 +284,8 @@ void loop() {
     if (DeviceModel == KEYBOARD_AND_MIDI || DeviceModel == MIDI_AND_KEYBOARD) {              // Device can switch between Keyboard and MIDI ?
       if (encoder_buttons.onPressAfter(ENCODER0_BUTTON,millis_LONG_PRESS_SwitchMIDImode)) {  // The defined enconder for switching is pressed more than xxxx millis ?
         Keyboard.releaseAll();
+        resetTimeScreenSaver();
+        bEncodersMoved = false;
         switchMIDIAndKeyboardMode();
       }
     } ////////////////////////////////////////////////////////////////////////////
@@ -281,6 +299,8 @@ void loop() {
     }
 
     if (keyIndex != -1) {
+      resetTimeScreenSaver();
+      bEncodersMoved = false;
       if (MIDImode) {
         pressedMIDIKey(actionsMIDIEncodersButtons, keyIndex);
       } else {
@@ -302,6 +322,8 @@ void loop() {
     }
 
     if (keyIndex != -1) {
+      resetTimeScreenSaver();
+      bEncodersMoved = false;
       if (MIDImode) {                                            // MIDI mode
         releasedMIDIKey(actionsMIDIEncodersButtons, keyIndex);
       } else {                                                   // Keyboard
@@ -314,6 +336,9 @@ void loop() {
 
   } // End ENCODER_BUTTONS
 
+  checklastTimeEncoderMoved();
+  chkTimeScreenSaver();
+  
 } // loop
 
 
@@ -461,4 +486,40 @@ void switchMIDIAndKeyboardMode() {
     testMode = false;
   }
   displayStatus();
+}
+
+
+
+void checklastTimeEncoderMoved(){
+  if (bEncodersMoved) {
+    if ( abs(millis() - lastTimeEncoderMoved) > MILLIS_DISPLAYING_ENCODER_INFO ) {
+      clearAreaBottomDisplay();
+      bEncodersMoved = false;
+    }
+  }
+}
+
+
+
+void resetTimeScreenSaver(){
+  if (bScreenSaverON) {
+     bScreenSaverON = false;
+     displayStatus();
+  }
+  lastTimeActionByUser = millis();
+}
+
+
+
+void chkTimeScreenSaver(){
+//  Serial.print("---"); 
+//  Serial.println(millis());
+//  Serial.println(lastTimeActionByUser);
+//  Serial.println(millisIntervalUntilScreenSaver);
+  if (! bScreenSaverON) {
+    if ( abs(millis() - lastTimeActionByUser) > millisIntervalUntilScreenSaver ) {
+      clearAllDisplay();
+      bScreenSaverON = true;
+    }
+  }
 }
