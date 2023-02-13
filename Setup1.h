@@ -25,8 +25,11 @@ boolean bUseEncoderButtons = true;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // pins to use in 4x4 keyboard
-const byte rowPins[ROWS] = {7, 8, 9, 10};         //rows
+//const byte rowPins[ROWS] = {7, 8, 9, 10};         //rows
+//const byte colPins[COLS] = {A0, 4, 5, 6};          //columns
+const byte rowPins[ROWS] = {A1, 8, 9, 10};         //rows
 const byte colPins[COLS] = {A0, 4, 5, 6};          //columns
+
 
 const byte index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
 
@@ -130,7 +133,7 @@ const char* const actions_LocalShift_labels[ROWS * COLS] = {
 /////
 Encoder myEnc0(1, 15);
 Encoder myEnc1(0, 14);
-Encoder myEnc2(A1, 16);
+Encoder myEnc2(7, 16);
 //   avoid using pins with LEDs attached
 
 // Analog PIN for use with the three encoder buttons

@@ -3,11 +3,10 @@
 //
 
 // pins to use in 4x4 keyboard en Setup2
-//byte rowPins[ROWS] = {4,5,6,7};             //rows
-//byte colPins[COLS] = {8,9,10,A0};           //columns
+//const byte rowPins[ROWS] = {4,5,6,7};             //rows
+//const byte colPins[COLS] = {8,9,10,A0};           //columns
 //
-// Setup1 (Define in the main tab the "SetupX.h" to use)
-//
+
 
 enum DEVICE_MODELS {
   KEYBOARD_ONLY,
@@ -32,8 +31,8 @@ boolean bUseEncoderButtons = false;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // pins to use in 4x4 keyboard
-byte rowPins[ROWS] = {4,5,6,7};             //rows
-byte colPins[COLS] = {8,9,10,A0};           //columns
+const byte rowPins[ROWS] = {4,5,6,A1};             //rows
+const byte colPins[COLS] = {8,9,10,A0};           //columns
 
 const byte index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
 
@@ -135,9 +134,9 @@ const char* const actions_LocalShift_labels[ROWS * COLS] = {
 //   Good Performance: only the first pin has interrupt capability
 //   Low Performance:  neither pin has interrupt capability
 /////
-Encoder myEnc0(A1, 16);
+Encoder myEnc0(1, 15);
 Encoder myEnc1(0, 14);
-Encoder myEnc2(1, 15);
+Encoder myEnc2(7, 16);
 //   avoid using pins with LEDs attached
 
 // Analog PIN for use with the three encoder buttons
@@ -213,12 +212,12 @@ enum MIDI_ACTIONS_STRUC_KEYS {
 };
 
 const byte actionsMIDI[ROWS * COLS][MIDI_ACTIONS_STRUC_KEYS_count] = {  
- {0, 1, 1, 64, 0, 127},
- {0, 1, 1, 65, 0, 127},
- {0, 1, 1, 66, 0, 127},
- {0, 1, 1, 67, 0, 127},
+ {0, 0, 0, 64, 0, 127},
+ {0, 0, 0, 65, 0, 127},
+ {0, 0, 0, 66, 0, 127},
+ {0, 0, 0, 67, 0, 127},
 
- {0, 1, 0, 68, 0, 127},
+ {0, 0, 0, 68, 0, 127},
  {0, 0, 0, 69, 0, 127},
  {0, 0, 0, 70, 0, 127},
  {0, 0, 0, 71, 0, 127},
