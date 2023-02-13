@@ -186,6 +186,7 @@ void loop() {
           case RELEASED:
             if (MIDImode) {
               releasedMIDIKey(actionsMIDI, keyIndex);
+              clearAreaBottomDisplay();
               break;
             }
 
@@ -246,7 +247,7 @@ void loop() {
   
             MIDIvalRotaryEncoders[nEncoder] = value;
             sendCtrlChange_USB(actionsMIDIEncoders[nEncoder][MIDI_nCC], value, channel);
-          } else { // Dual UP/DOWN 
+          } else {  // Dual UP/DOWN 
               pressedMIDIKey( ((indexUpDown == INX_ENCODER_DOWN) ? actionsMIDIEncodersDOWN : actionsMIDIEncodersUP ),  nEncoder);
           }
           // End MIDI
@@ -330,8 +331,8 @@ void loop() {
         if (! testMode) {
           sendKeyDepressed(actionsEncoder_Buttons, keyIndex);
         }
-        clearAreaBottomDisplay();
       }
+      clearAreaBottomDisplay();
     }
 
   } // End ENCODER_BUTTONS
@@ -482,7 +483,7 @@ void switchMIDIAndKeyboardMode() {
     digitalWrite(pin_LED_Status, HIGH);                                      // both LEDS ON;
   } else {
     sendMIDIreset();
-    localShiftMode == NO_LOCAL_SHIFT;                                        // refresh LED status inside 'loop'
+    localShiftMode = NO_LOCAL_SHIFT;                                        // refresh LED status inside 'loop'
     testMode = false;
   }
   displayStatus();
@@ -512,10 +513,6 @@ void resetTimeScreenSaver(){
 
 
 void chkTimeScreenSaver(){
-//  Serial.print("---"); 
-//  Serial.println(millis());
-//  Serial.println(lastTimeActionByUser);
-//  Serial.println(millisIntervalUntilScreenSaver);
   if (! bScreenSaverON) {
     if ( abs(millis() - lastTimeActionByUser) > millisIntervalUntilScreenSaver ) {
       clearAllDisplay();
