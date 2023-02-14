@@ -9,8 +9,6 @@ I use it with Krita but can be programmed with any key code combination, so it c
 The 16 keys and the 3 knobs/push buttons can send any combination of key codes.
 The preprogrammed key codes can be modified easily, depending on your preferences, changing the corresponding program lines.
 
-![Key code settings](/DOC/KeySettings.jpg)
-
 I have programmed the first knob for "rotate canvas" function (and reset the rotation if you press the knob)
 The second knob is assigned for zooming (and reset the zoom to "fit page" pressing the knob)
 The third knob is for resizing the brush. In this case, pushing the knob toggle the 'erase mode' of the brush.
