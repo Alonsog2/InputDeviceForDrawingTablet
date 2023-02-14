@@ -6,6 +6,7 @@
 #define SETUP_TO_USE "Setup1.h"
 
 
+
 #define CF(s) ((const __FlashStringHelper *)s)
 
 ///////////////////////////////////////////////////////////////////////////////   4X4 keyboard   ///////////////////////////////////////////////////////
@@ -24,8 +25,8 @@ char keys[ROWS][COLS] = {           // characters behind number 9 are the next i
 
 enum LOCAL_SHIFT_MODES {
   NO_LOCAL_SHIFT = 0,
-  LOCAL_SHIFT_TEMP,                         // Pressing once localShift key. Then, after pressing any other key, the system automaticaly return to a NO_LOCAL_SHIFT mode
-  LOCAL_SHIFT_LOCKED,                       // Pressing twice localShift key. Then the system is in localShift mode until localShift key is pressed again.
+  LOCAL_SHIFT_TEMP,                         // Pressing once localShift key. Then, after pressing any other key, the system automaticaly return to NO_LOCAL_SHIFT mode
+  LOCAL_SHIFT_LOCKED,                       // Pressing twice localShift key. Then the system remains in localShift mode until localShift key is pressed again.
 };
 
 LOCAL_SHIFT_MODES localShiftMode = NO_LOCAL_SHIFT;
@@ -35,6 +36,7 @@ LOCAL_SHIFT_MODES localShiftMode = NO_LOCAL_SHIFT;
 #define millis_LED_TestMode_Low 900
 #define millis_LED_MidiMode 1000
 #define millis_LONG_PRESS_SwitchMIDImode 2000  
+
 long lastMillis_LED_Status = 0;
 
 char key;
@@ -53,7 +55,7 @@ boolean bEncodersMoved = false;
 long lastTimeEncoderMoved = 0;
 
 
-//////////////////////////////////////////////////////////////////////   Analog button (3 keys readed in only one analogic input)  ////////////////////////
+//////////////////////////////////////////////////////////////////////   Analog buttons (3 keys readed in only one analogic input)  ////////////////////////
 
 #include <AnalogMultiButton.h>
 
@@ -75,7 +77,7 @@ enum ENCODER_BUTTONS{
 
 
 #include SETUP_TO_USE
-#include "Display.h"
+
 #include "MIDI.h"
 
 
@@ -95,6 +97,7 @@ boolean bScreenSaverON = false;
 
 
 /////////////////////////////////////////////////////// setup //////////////////////////////////////////////////////////////
+
 void setup() {
   Serial.begin(115200);
   delay(3000);
@@ -114,7 +117,7 @@ void setup() {
 
   pinMode(pin_LED_Status, OUTPUT);                       // LED for localShift indication
 
-  refreshLEDs_Status();
+  refreshLED_Status();
 
   keypad.setDebounceTime(50);
 
@@ -198,7 +201,7 @@ void loop() {
               localShiftMode = NO_LOCAL_SHIFT;
               Keyboard.releaseAll();
               displayStatus();
-              refreshLEDs_Status();
+              refreshLED_Status();
             }
 
             sendKeyDepressed( ( (localShiftMode) ? actions_LocalShift : actions), keyIndex);
@@ -215,7 +218,7 @@ void loop() {
       }
     }
   }
-  refreshLEDs_Status();
+  refreshLED_Status();
 
   // check the ENCODERS
   if (bUseRotaryEncoders) {
@@ -398,7 +401,7 @@ void resetEncoderN(int nEncoder) {
 
 
 
-void refreshLEDs_Status() {
+void refreshLED_Status() {
   static boolean prevStatusLed = false;
   static boolean prevStatusLed_TestMode = false;
   static byte nPulseTest = 0;
@@ -406,7 +409,7 @@ void refreshLEDs_Status() {
   boolean newStatusLed_TestMode;
 
   if (MIDImode) {                                                                 // MIDI
-    refreshLEDs_inMIDImode();
+    refreshLED_inMIDImode();
     return;
   }
 
@@ -464,7 +467,7 @@ void refreshLEDs_Status() {
 
 
 
-void refreshLEDs_inMIDImode() {
+void refreshLED_inMIDImode() {
   static boolean prevStatusLed = false;
   boolean newStatusLed;
   newStatusLed = prevStatusLed;
@@ -480,10 +483,10 @@ void refreshLEDs_inMIDImode() {
 void switchMIDIAndKeyboardMode() {
   MIDImode = !MIDImode;
   if (MIDImode) {
-    digitalWrite(pin_LED_Status, HIGH);                                      // both LEDS ON;
+    digitalWrite(pin_LED_Status, HIGH);                                      // LED ON;
   } else {
     sendMIDIreset();
-    localShiftMode = NO_LOCAL_SHIFT;                                        // refresh LED status inside 'loop'
+    localShiftMode = NO_LOCAL_SHIFT;                                         // will refresh LED status inside 'loop'
     testMode = false;
   }
   displayStatus();

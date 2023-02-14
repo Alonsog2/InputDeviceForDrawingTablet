@@ -3,8 +3,8 @@
 //
 
 
-void sendNoteOn_USB(byte pitch, byte velocity, byte channel) {               // enviar notaOn al PC por USB del Leonardo
-  midiEventPacket_t midiPack = {0x09, 0x90 | (channel-1), pitch, velocity};  // MIDIUSB numera los canales del 0 al 15
+void sendNoteOn_USB(byte pitch, byte velocity, byte channel) {               // Send noteOn 
+  midiEventPacket_t midiPack = {0x09, 0x90 | (channel-1), pitch, velocity};  // MIDIUSB channels are form 0 to 15
   MidiUSB.sendMIDI(midiPack);
   MidiUSB.flush();
   displayMIDIInfo(0x90, pitch, velocity, channel);
@@ -12,8 +12,8 @@ void sendNoteOn_USB(byte pitch, byte velocity, byte channel) {               // 
 
 
 
-void sendNoteOff_USB(byte pitch, byte velocity, byte channel ) {            // enviar notaOff al PC por USB del Leonardo
-  midiEventPacket_t midiPack = {0x08, 0x80 | (channel-1), pitch, velocity}; // MIDIUSB numera los canales del 0 al 15
+void sendNoteOff_USB(byte pitch, byte velocity, byte channel ) {            // Send noteOff
+  midiEventPacket_t midiPack = {0x08, 0x80 | (channel-1), pitch, velocity}; // MIDIUSB channels are form 0 to 15
   MidiUSB.sendMIDI(midiPack);
   MidiUSB.flush();
   displayMIDIInfo(0x80, pitch, velocity, channel);
@@ -22,7 +22,7 @@ void sendNoteOff_USB(byte pitch, byte velocity, byte channel ) {            // e
 
 
 void sendCtrlChange_USB(byte control, byte value, byte channel) {
-  midiEventPacket_t event = {0x0B, 0xB0 | (channel-1), control, value};     // MIDIUSB numera los canales del 0 al 15
+  midiEventPacket_t event = {0x0B, 0xB0 | (channel-1), control, value};     // MIDIUSB channels are form 0 to 15
   MidiUSB.sendMIDI(event);
   MidiUSB.flush();
   displayMIDIInfo(0xB0, control, value, channel);
@@ -38,7 +38,7 @@ void sendMIDIreset(){
 
 
 
-//enum defined in Setups/////////////////////////////////
+//This enum is defined in Setups/////////////////////////////////
 //  MIDI_CHANNEL = 0,           // Channel (1-16/0=global)
 //  MIDI_CC_OR_NOTE,            // CC or Note (0,1)
 //  MIDI_MOMENTARY,             // momentary or toggle (0/1)
@@ -99,7 +99,7 @@ void releasedMIDIKey(byte acts[][MIDI_ACTIONS_STRUC_KEYS_count], int keyIndex){
 
 
 
-void  notePitch2Notation(byte pitch) {
+void notePitch2Notation(byte pitch) {
   byte inx = 0;
   int octave = (pitch / 12) -1;           // octave from -1 to 9
   byte indexNote = (pitch % 12) *2 ;      // notes form 0=C to 11=B (the second char can be the sharp "#")

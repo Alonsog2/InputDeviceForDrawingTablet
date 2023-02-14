@@ -2,12 +2,13 @@
 // Setup1 (Define in the main tab the "SetupX.h" to use)
 //
 
+
 enum DEVICE_MODELS {
   KEYBOARD_ONLY,
   MIDI_ONLY,
   KEYBOARD_AND_MIDI,                  // Starts in keyboard mode but allows switch to MIDI  
   MIDI_AND_KEYBOARD                   // Starts in MIDI mode but allows switch to keyboard
-};                                    // Long press EncoderButton number 0 switch mode
+};                                    // Long press EncoderButton#0 switch mode
 
 byte DeviceModel = KEYBOARD_AND_MIDI;
 
@@ -25,8 +26,6 @@ boolean bUseEncoderButtons = true;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // pins to use in 4x4 keyboard
-//const byte rowPins[ROWS] = {7, 8, 9, 10};         //rows
-//const byte colPins[COLS] = {A0, 4, 5, 6};          //columns
 const byte rowPins[ROWS] = {A1, 8, 9, 10};         //rows
 const byte colPins[COLS] = {A0, 4, 5, 6};          //columns
 

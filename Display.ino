@@ -1,19 +1,17 @@
-//#include <Wire.h>
 #include "SSD1306Ascii.h"
-//#include "SSD1306AsciiWire.h"
 #include "SSD1306AsciiAvrI2c.h"
 
 #define I2C_ADDRESS 0x3C     // 0X3C+SA0 - 0x3C or 0x3D
-#define RST_PIN -1          // Define proper RST_PIN if required.
+#define RST_PIN -1           // Define proper RST_PIN if required.
+
+
+SSD1306AsciiAvrI2c oled;
 
 #define INIT_LINE_AREA2 2
 
 #define MSG_NORMAL_MODE "4x4Keys"
 #define MAX_COL 128
 #define MAX_ROW 64
-
-//SSD1306AsciiWire oled;
-SSD1306AsciiAvrI2c oled;
 
 
 
