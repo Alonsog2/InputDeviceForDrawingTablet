@@ -1,4 +1,4 @@
-# Input device for drawing tablet (and MIDI device too)
+# Input device for drawing tablet (and now, MIDI device too)
 
 ![Image 1](/DOC/Img1.JPG)
 
@@ -14,8 +14,17 @@ The second knob is assigned for zooming (and reset the zoom to "fit page" pressi
 The third knob is for resizing the brush. In this case, pushing the knob toggle the 'erase mode' of the brush.
 The 4x4 keyboard has been programmed according to the image. In some cases, the shortcuts in my Krita setup are not the standard ones, so pay attention to this.
 
-In this new version, a key can be configured to switch beetwen 'Keyboarde mode' and 'MIDI mode' whit a long press. In this case, the device will be recognized as a MIDI controller by the computer. All the parámeters related to MIDI mode are defined in the config file.
+In this new version, a display shows the info about what key or action is performed. 
 
-All the config parameters are located in the file 'Setup1.h'. It is possible to use different config files, as 'Setup2.h' for example, changing the corresponding line in the main program.For more information, schematic, etc. see the files in the DOC folder.
+In addition, a key (any of the 4x4) can be defined as 'local shift', which allow accessing to a different set of configurations for the rest of 15 keys.
+Pressing once 'local shift' the system enters in temporary 'local shift' mode, and after the next stroke in any key, the system will return to normal mode.
+Pressing twice 'local shift' the system enters in 'local shift' mode, and remains in this mode until deactivated by a new press on 'local shift'.
+A long press on 'local shift' will switch beetwen 'normal mode' and 'Test mode'. While in 'test mode' no keystrokes are sent to the computer but displayed on the screen. Handy for checking how all the keys are configured.
+
+A long press (more than 2 seconds) on 'Knob #1' will switch beetwen 'Keyboard mode' and 'MIDI mode'. In this case, the device will be recognized as a MIDI controller by the computer. All the parameters related to MIDI mode are defined in the setup file and are independent of the keyboard mode.
+
+All the config parameters are located in the file 'Setup1.h'. It is possible to use different config files, such as 'Setup2.h'... etc., changing the corresponding line in the main program (just in case you have several devices with different configurations).
+
+For more information, schematic, etc. see the files in the DOC folder.
 
 You can see a video with an example of use: [Example in youtube](https://youtu.be/WGJYHXOumJs)
