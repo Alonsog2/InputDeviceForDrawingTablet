@@ -32,6 +32,6 @@ A long press (more than 2 seconds) on 'Knob #1' will switch beetwen 'Keyboard mo
 
 All the config parameters are located in the file 'Setup1.h'. It is possible to use different config files, such as 'Setup2.h'... etc., changing the corresponding line in the main program (just in case you have several devices with different configurations).
 
-For more information, schematic, etc. see the files in the DOC folder.
+For more information, schematic, 3D printer file, etc. see the files in the DOC folder.
 
 You can see a video with an example of use: [Example in youtube](https://youtu.be/WGJYHXOumJs)
