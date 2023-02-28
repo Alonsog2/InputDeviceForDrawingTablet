@@ -20,7 +20,9 @@ Bear in mind that, in some cases, the shortcuts in my Krita setup are not the st
 
 In this new version, a display shows the info about what key or action is performed. 
 
-In addition, a key (any of the 4x4) can be defined as 'local shift', which allow accessing to a different set of configurations for the rest of 15 keys.
+LocalShift function:
+Now, the system can have to different sets of keys. Let's call them 'primary set' and 'secondary set'.
+A key must be defined as 'LocalShift' (by default the key A) and it opperates as follow, allowing access to a different set of configurations for the rest of 15 keys.
 
 Pressing once 'local shift' the system enters in temporary 'local shift' mode (the LED blinks), and after the next stroke in any key, the system will return to normal mode (and the LED turns off).
 
@@ -28,6 +30,8 @@ Pressing twice 'local shift' the system enters in 'local shift' mode (the LED tu
 
 A long press on 'local shift' will switch beetwen 'normal mode' and 'Test mode' (the LED blinks less frequently). While in 'test mode' no keystrokes are sent to the computer but displayed on the screen. Handy for checking how all the keys are configured. To exit 'test mode', long-press 'local shift' again.
 
+MIDI device:
+Now, the system can act as a MIDI controller too. 
 A long press (more than 2 seconds) on 'Knob #1' will switch beetwen 'Keyboard mode' and 'MIDI mode'. In this case, the device will be recognized as a MIDI controller by the computer. All the parameters related to MIDI mode are defined in the setup file and are independent of the keyboard mode.
 
 All the config parameters are located in the file 'Setup1.h'. It is possible to use different config files, such as 'Setup2.h'... etc., changing the corresponding line in the main program (just in case you have several devices with different configurations).
