@@ -1,4 +1,4 @@
-# Input device for drawing tablet
+# Input device for drawing tablet (and MIDI device too)
 
 ![Image 1](/DOC/Img1.JPG)
 
@@ -14,6 +14,8 @@ The second knob is assigned for zooming (and reset the zoom to "fit page" pressi
 The third knob is for resizing the brush. In this case, pushing the knob toggle the 'erase mode' of the brush.
 The 4x4 keyboard has been programmed according to the image. In some cases, the shortcuts in my Krita setup are not the standard ones, so pay attention to this.
 
-For more information, schematic, etc. see the files in the DOC folder.
+In this new version, a key can be configured to switch beetwen 'Keyboarde mode' and 'MIDI mode' whit a long press. In this case, the device will be recognized as a MIDI controller by the computer. All the parámeters related to MIDI mode are defined in the config file.
+
+All the config parameters are located in the file 'Setup1.h'. It is possible to use different config files, as 'Setup2.h' for example, changing the corresponding line in the main program.For more information, schematic, etc. see the files in the DOC folder.
 
 You can see a video with an example of use: [Example in youtube](https://youtu.be/WGJYHXOumJs)
