@@ -28,11 +28,11 @@ Pressing once 'local shift' the system enters in temporary 'local shift' mode (t
 
 Pressing twice 'local shift' the system enters in 'local shift' mode (the LED turns on) , and remains in this mode until deactivated by a new press on 'local shift' and the system will return to normal mode (and the LED turns off).
 
-A long press on 'local shift' will switch beetwen 'normal mode' and 'Test mode' (the LED blinks less frequently). While in 'test mode' no keystrokes are sent to the computer but displayed on the screen. Handy for checking how all the keys are configured. To exit 'test mode', long-press 'local shift' again.
+A long press on 'local shift' will switch between 'normal mode' and 'Test mode' (the LED blinks less frequently). While in 'test mode' no keystrokes are sent to the computer but displayed on the screen. Handy for checking how all the keys are configured. To exit 'test mode', long-press 'local shift' again.
 
 MIDI device:
 Now, the system can act as a MIDI controller too. 
-A long press (more than 2 seconds) on 'Knob #1' will switch beetwen 'Keyboard mode' and 'MIDI mode'. In this case, the device will be recognized as a MIDI controller by the computer. All the parameters related to MIDI mode are defined in the setup file and are independent of the keyboard mode.
+A long press (more than 2 seconds) on 'Knob #1' will switch between 'Keyboard mode' and 'MIDI mode'. In this case, the device will be recognized as a MIDI controller by the computer. All the parameters related to MIDI mode are defined in the setup file and are independent of the keyboard mode.
 
 All the config parameters are located in the file 'Setup1.h'. It is possible to use different config files, such as 'Setup2.h'... etc., changing the corresponding line in the main program (just in case you have several devices with different configurations).
 
