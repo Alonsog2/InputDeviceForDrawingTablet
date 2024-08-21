@@ -67,6 +67,11 @@ void displayKeyLabel(String label) {
 
 void displayStatus() {
   char msg[11] = MSG_NORMAL_MODE;
+
+  if (bScreenSaverON) {
+    strcpy(msg, "Locked");
+  }
+  
   if (testMode) {
     strcpy(msg, "Test");
     if (localShiftMode != NO_LOCAL_SHIFT) {

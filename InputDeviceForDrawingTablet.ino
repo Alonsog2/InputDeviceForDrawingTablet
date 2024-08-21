@@ -133,6 +133,27 @@ void setup() {
 
 void loop() {
   byte keyIndex;
+  
+  chkTimeScreenSaver();
+  
+  if (bScreenSaverON) {
+    if (keypad.getKeys()) {
+      for (int i = 0; i < LIST_MAX; i++) {                       // Scan the whole key list.
+        if ( keypad.key[i].stateChanged ) {                      // Only find keys that have changed state.
+          keyIndex = keypad.key[i].kchar - char('0');            // get the index from 0 to 15
+          if (keyIndex == index_LocalShiftKey) {
+            if (keypad.key[i].kstate == HOLD) {
+               resetTimeScreenSaver();  
+            }
+          }
+        }
+      }
+      lastTimeActionByUser = millis();      
+      displayStatus(); 
+    } 
+    return; 
+  }
+  
   // Fills kpd.key[ ] array with up-to 10 active keys. Returns true if there are ANY active keys.
   if (keypad.getKeys()) {
     for (int i = 0; i < LIST_MAX; i++) {                       // Scan the whole key list.
@@ -341,7 +362,6 @@ void loop() {
   } // End ENCODER_BUTTONS
 
   checklastTimeEncoderMoved();
-  chkTimeScreenSaver();
   
 } // loop
 
@@ -516,10 +536,10 @@ void resetTimeScreenSaver(){
 
 
 void chkTimeScreenSaver(){
-  if (! bScreenSaverON) {
+  //if (! bScreenSaverON) {
     if ( abs(millis() - lastTimeActionByUser) > millisIntervalUntilScreenSaver ) {
       clearAllDisplay();
       bScreenSaverON = true;
     }
-  }
+  //}
 }
