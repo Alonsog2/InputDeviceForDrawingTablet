@@ -35,7 +35,7 @@ LOCAL_SHIFT_MODES localShiftMode = NO_LOCAL_SHIFT;
 #define millis_LED_TestMode_High 50
 #define millis_LED_TestMode_Low 900
 #define millis_LED_MidiMode 1000
-#define millis_LONG_PRESS_SwitchMIDImode 2000  
+#define millis_LONG_PRESS_SwitchMIDImode 2000
 
 long lastMillis_LED_Status = 0;
 
@@ -50,9 +50,9 @@ char key;
 #define INX_ENCODER_UP 1
 #define INX_ENCODER_DOWN 0
 
-#define MILLIS_DISPLAYING_ENCODER_INFO 600  
+#define MILLIS_DISPLAYING_ENCODER_INFO 600
 boolean bEncodersMoved = false;
-long lastTimeEncoderMoved = 0;
+unsigned long lastTimeEncoderMoved = 0;
 
 
 //////////////////////////////////////////////////////////////////////   Analog buttons (3 keys readed in only one analogic input)  ////////////////////////
@@ -69,7 +69,7 @@ const int ENCODER_BUTTONS_VALUES[ENCODER_BUTTONS_TOTAL] = {0, 315, 482};
 
 // you can also define constants for each of your buttons, which makes your code easier to read
 // define these in the same order as the numbers in your BUTTONS_VALUES array, so whichever button has the smallest analogRead() number should come first
-enum ENCODER_BUTTONS{
+enum ENCODER_BUTTONS {
   ENCODER2_BUTTON = 0,
   ENCODER1_BUTTON,
   ENCODER0_BUTTON
@@ -88,11 +88,12 @@ AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TO
 
 boolean testMode = false;
 
-#define SECONDS_UNTIL_SCREENSAVER 300     // 300/60 = 5 minutes
+#define SECONDS_UNTIL_SCREENSAVER 10     // 300/60 = 5 minutes
 
-long lastTimeActionByUser = 0;
-long millisIntervalUntilScreenSaver = (long)(SECONDS_UNTIL_SCREENSAVER) * 1000;
+unsigned long lastTimeActionByUser = 0;
+unsigned long millisIntervalUntilScreenSaver = (unsigned long)(SECONDS_UNTIL_SCREENSAVER) * 1000;
 boolean bScreenSaverON = false;
+boolean bSystemLocked = false;
 
 
 
@@ -106,7 +107,7 @@ void setup() {
   if (DeviceModel != KEYBOARD_ONLY) {
     initMIDI();
   }
-  
+
   if (bUseDisplay) {
     initDisplay();
   }
@@ -133,27 +134,34 @@ void setup() {
 
 void loop() {
   byte keyIndex;
-  
-  chkTimeScreenSaver();
-  
-  if (bScreenSaverON) {
+  unsigned long millisNow = millis();
+
+  if ( abs(millisNow - lastTimeActionByUser) > millisIntervalUntilScreenSaver ) {
+    if (! bScreenSaverON) {
+      clearAllDisplay();      
+      bScreenSaverON = true;
+    }
+    bSystemLocked = true;
+  }
+
+  if (bSystemLocked) {
     if (keypad.getKeys()) {
       for (int i = 0; i < LIST_MAX; i++) {                       // Scan the whole key list.
         if ( keypad.key[i].stateChanged ) {                      // Only find keys that have changed state.
           keyIndex = keypad.key[i].kchar - char('0');            // get the index from 0 to 15
           if (keyIndex == index_LocalShiftKey) {
             if (keypad.key[i].kstate == HOLD) {
-               resetTimeScreenSaver();  
+              bSystemLocked = false;
             }
           }
         }
       }
-      lastTimeActionByUser = millis();      
-      displayStatus(); 
-    } 
-    return; 
+      displayStatus();
+      resetTimeScreenSaver();      
+    }
+    if (bSystemLocked) return;
   }
-  
+
   // Fills kpd.key[ ] array with up-to 10 active keys. Returns true if there are ANY active keys.
   if (keypad.getKeys()) {
     for (int i = 0; i < LIST_MAX; i++) {                       // Scan the whole key list.
@@ -268,11 +276,11 @@ void loop() {
                 value = actionsMIDIEncoders[nEncoder][MIDI_ValMin];
               }
             }
-  
+
             MIDIvalRotaryEncoders[nEncoder] = value;
             sendCtrlChange_USB(actionsMIDIEncoders[nEncoder][MIDI_nCC], value, channel);
-          } else {  // Dual UP/DOWN 
-              pressedMIDIKey( ((indexUpDown == INX_ENCODER_DOWN) ? actionsMIDIEncodersDOWN : actionsMIDIEncodersUP ),  nEncoder);
+          } else {  // Dual UP/DOWN
+            pressedMIDIKey( ((indexUpDown == INX_ENCODER_DOWN) ? actionsMIDIEncodersDOWN : actionsMIDIEncodersUP ),  nEncoder);
           }
           // End MIDI
 
@@ -307,14 +315,14 @@ void loop() {
 
     // Check possible switch Keyboard/MIDI mode //////////////////////////////////
     if (DeviceModel == KEYBOARD_AND_MIDI || DeviceModel == MIDI_AND_KEYBOARD) {              // Device can switch between Keyboard and MIDI ?
-      if (encoder_buttons.onPressAfter(ENCODER0_BUTTON,millis_LONG_PRESS_SwitchMIDImode)) {  // The defined enconder for switching is pressed more than xxxx millis ?
+      if (encoder_buttons.onPressAfter(ENCODER0_BUTTON, millis_LONG_PRESS_SwitchMIDImode)) { // The defined enconder for switching is pressed more than xxxx millis ?
         Keyboard.releaseAll();
         resetTimeScreenSaver();
         bEncodersMoved = false;
         switchMIDIAndKeyboardMode();
       }
     } ////////////////////////////////////////////////////////////////////////////
-    
+
     if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {                               // 0= Detect only the first pressing
       keyIndex = 0;
     } else if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
@@ -362,7 +370,7 @@ void loop() {
   } // End ENCODER_BUTTONS
 
   checklastTimeEncoderMoved();
-  
+
 } // loop
 
 
@@ -434,40 +442,40 @@ void refreshLED_Status() {
   }
 
   if (testMode) {                                                                 // TestMode
-      newStatusLed = prevStatusLed;
-      switch (nPulseTest) {
-        case 0:                                                                   // NO_LOCAL_SHIFT status -> One short blink and a large pause
-          if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
-            lastMillis_LED_Status = millis();
-            newStatusLed = false;
-            nPulseTest ++;
-          }
-          break;
-        case 1:
-          if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
-            lastMillis_LED_Status = millis();
-            if (localShiftMode != NO_LOCAL_SHIFT) {                               // Other status than NO_LOCAL_SHIFT -> Two short blink and a large pause
-              newStatusLed = true;
-            }
-            nPulseTest ++;
-          }
-          break;
-        case 2:
-          if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
-            lastMillis_LED_Status = millis();
-            newStatusLed = false;
-            nPulseTest ++;
-          }
-          break;
-        case 3:
-          if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_Low) ) {
-            lastMillis_LED_Status = millis();
+    newStatusLed = prevStatusLed;
+    switch (nPulseTest) {
+      case 0:                                                                   // NO_LOCAL_SHIFT status -> One short blink and a large pause
+        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+          lastMillis_LED_Status = millis();
+          newStatusLed = false;
+          nPulseTest ++;
+        }
+        break;
+      case 1:
+        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+          lastMillis_LED_Status = millis();
+          if (localShiftMode != NO_LOCAL_SHIFT) {                               // Other status than NO_LOCAL_SHIFT -> Two short blink and a large pause
             newStatusLed = true;
-            nPulseTest = 0;
           }
-          break;
-      }
-      
+          nPulseTest ++;
+        }
+        break;
+      case 2:
+        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_High) ) {
+          lastMillis_LED_Status = millis();
+          newStatusLed = false;
+          nPulseTest ++;
+        }
+        break;
+      case 3:
+        if (millis() > (lastMillis_LED_Status + millis_LED_TestMode_Low) ) {
+          lastMillis_LED_Status = millis();
+          newStatusLed = true;
+          nPulseTest = 0;
+        }
+        break;
+    }
+
   } else {                                                                   // NO testMode (normal)
 
     if (localShiftMode == LOCAL_SHIFT_TEMP) {                                // if LOCAL_SHIFT_TEMP mode, blink led
@@ -514,7 +522,7 @@ void switchMIDIAndKeyboardMode() {
 
 
 
-void checklastTimeEncoderMoved(){
+void checklastTimeEncoderMoved() {
   if (bEncodersMoved) {
     if ( abs(millis() - lastTimeEncoderMoved) > MILLIS_DISPLAYING_ENCODER_INFO ) {
       clearAreaBottomDisplay();
@@ -525,21 +533,7 @@ void checklastTimeEncoderMoved(){
 
 
 
-void resetTimeScreenSaver(){
-  if (bScreenSaverON) {
-     bScreenSaverON = false;
-     displayStatus();
-  }
+void resetTimeScreenSaver() {
+  bScreenSaverON = false;
   lastTimeActionByUser = millis();
-}
-
-
-
-void chkTimeScreenSaver(){
-  //if (! bScreenSaverON) {
-    if ( abs(millis() - lastTimeActionByUser) > millisIntervalUntilScreenSaver ) {
-      clearAllDisplay();
-      bScreenSaverON = true;
-    }
-  //}
 }

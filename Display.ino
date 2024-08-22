@@ -64,11 +64,10 @@ void displayKeyLabel(String label) {
 }
 
 
-
 void displayStatus() {
   char msg[11] = MSG_NORMAL_MODE;
 
-  if (bScreenSaverON) {
+  if (bSystemLocked) {
     strcpy(msg, "Locked");
   }
   
