@@ -88,10 +88,13 @@ AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TO
 
 boolean testMode = false;
 
-#define SECONDS_UNTIL_SCREENSAVER 10     // 300/60 = 5 minutes
+#define SECONDS_UNTIL_SCREENSAVER_IF_SYSTEMUNLOCKED 300   // (300/60) = 5 minutes
+#define SECONDS_UNTIL_SCREENSAVER_IF_SYSTEMLOCKED 5     
 
 unsigned long lastTimeActionByUser = 0;
-unsigned long millisIntervalUntilScreenSaver = (unsigned long)(SECONDS_UNTIL_SCREENSAVER) * 1000;
+unsigned long millisIntervalUntilScreenSaverIfSystemUnlocked = (unsigned long)(SECONDS_UNTIL_SCREENSAVER_IF_SYSTEMUNLOCKED) * 1000;
+unsigned long millisIntervalUntilScreenSaverIfSystemLocked = (unsigned long)(SECONDS_UNTIL_SCREENSAVER_IF_SYSTEMLOCKED) * 1000;
+unsigned long millisIntervalScreenSaver = millisIntervalUntilScreenSaverIfSystemUnlocked;
 boolean bScreenSaverON = false;
 boolean bSystemLocked = false;
 
@@ -136,9 +139,9 @@ void loop() {
   byte keyIndex;
   unsigned long millisNow = millis();
 
-  if ( abs(millisNow - lastTimeActionByUser) > millisIntervalUntilScreenSaver ) {
+  if ( abs(millisNow - lastTimeActionByUser) > millisIntervalScreenSaver ) {
     if (! bScreenSaverON) {
-      clearAllDisplay();      
+      clearAllDisplay(); 
       bScreenSaverON = true;
     }
     bSystemLocked = true;
@@ -159,7 +162,12 @@ void loop() {
       displayStatus();
       resetTimeScreenSaver();      
     }
-    if (bSystemLocked) return;
+    if (bSystemLocked) {
+      millisIntervalScreenSaver = millisIntervalUntilScreenSaverIfSystemLocked;
+      return;
+    } else {
+      millisIntervalScreenSaver = millisIntervalUntilScreenSaverIfSystemUnlocked;
+    }
   }
 
   // Fills kpd.key[ ] array with up-to 10 active keys. Returns true if there are ANY active keys.
