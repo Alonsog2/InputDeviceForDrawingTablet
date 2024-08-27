@@ -3,8 +3,9 @@
 */
 
 
-#define SETUP_TO_USE "Setup1.h"
+#define SETUP_TO_USE "Setup2.h"
 
+//#define INIT_IN_ TEST_MODE           // uncomment this line while testing the sketch, to prevent sending keystrokes to the computer
 
 
 #define CF(s) ((const __FlashStringHelper *)s)
@@ -86,7 +87,12 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 // make an AnalogMultiButton object, pass in the pin, total and values array
 AnalogMultiButton encoder_buttons(ENCODER_BUTTONS_ANALOG_PIN, ENCODER_BUTTONS_TOTAL, ENCODER_BUTTONS_VALUES);
 
-boolean testMode = false;
+#ifdef INIT_IN_ TEST_MODE
+  boolean testMode = true;
+#else
+  boolean testMode = false;
+#endif
+
 
 #define SECONDS_UNTIL_SCREENSAVER_IF_SYSTEMUNLOCKED 300   // (300/60) = 5 minutes
 #define SECONDS_UNTIL_SCREENSAVER_IF_SYSTEMLOCKED 5     
@@ -137,8 +143,21 @@ void setup() {
 
 void loop() {
   byte keyIndex;
-  unsigned long millisNow = millis();
 
+  encoder_buttons.update();                                                                  // check encoder_buttons only once for the whole loop
+  
+  if (bCheckMIDIpedalIn4x4keysMode){                                                         // Checking MIDIpedal while in 4x4keys mode 
+    if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {                               // 0= Detect only the first pressing
+       pressedMIDIKey(actionsMIDIEncodersButtons, 2);                                        // MIDIpedal is button #2       
+    }
+
+    if (encoder_buttons.onRelease(ENCODER2_BUTTON)) {
+      releasedMIDIKey(actionsMIDIEncodersButtons, 2);
+      clearAreaBottomDisplay();
+    }
+  }
+
+  unsigned long millisNow = millis();
   if ( abs(millisNow - lastTimeActionByUser) > millisIntervalScreenSaver ) {
     if (! bScreenSaverON) {
       clearAllDisplay(); 
@@ -319,7 +338,7 @@ void loop() {
   // check ENCODER_BUTTONS  ////////////////////////////////////////////////////////////////////////////////////////
   if (bUseEncoderButtons) {
     int keyIndex = -1;
-    encoder_buttons.update();
+    //encoder_buttons has been updated at the begining of the loop
 
     // Check possible switch Keyboard/MIDI mode //////////////////////////////////
     if (DeviceModel == KEYBOARD_AND_MIDI || DeviceModel == MIDI_AND_KEYBOARD) {              // Device can switch between Keyboard and MIDI ?
@@ -331,11 +350,11 @@ void loop() {
       }
     } ////////////////////////////////////////////////////////////////////////////
 
-    if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {                               // 0= Detect only the first pressing
+    if (encoder_buttons.onPressAndAfter(ENCODER0_BUTTON, 0)) {   // 0= Detect only the first pressing
       keyIndex = 0;
     } else if (encoder_buttons.onPressAndAfter(ENCODER1_BUTTON, 0)) {
       keyIndex = 1;
-    } else if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0)) {
+    } else if (encoder_buttons.onPressAndAfter(ENCODER2_BUTTON, 0) && (!bCheckMIDIpedalIn4x4keysMode)) {
       keyIndex = 2;
     }
 
@@ -358,7 +377,7 @@ void loop() {
       keyIndex = 0;
     } else if (encoder_buttons.onRelease(ENCODER1_BUTTON)) {
       keyIndex = 1;
-    } else if (encoder_buttons.onRelease(ENCODER2_BUTTON)) {
+    } else if (encoder_buttons.onRelease(ENCODER2_BUTTON) && (!bCheckMIDIpedalIn4x4keysMode)) {
       keyIndex = 2;
     }
 

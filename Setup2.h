@@ -1,6 +1,7 @@
 //
 // Setup2 (Define in the main tab the "SetupX.h" to use)
 //
+// 4x4keys without rotary encoders + one pedal MIDI connected to first encoderButton (always active)
 
 
 enum DEVICE_MODELS {
@@ -14,11 +15,12 @@ byte DeviceModel = KEYBOARD_AND_MIDI;
 
 boolean bUseDisplay = true;          // PINs 2,3 are used by Wire library (SDA, SCL in Display)
 
-boolean bUseRotaryEncoders = true;
+boolean bUseRotaryEncoders = false;
 boolean bUseEncoderButtons = false;
+boolean bCheckMIDIpedalIn4x4keysMode =true;
 
 
-#define pin_LED_Status A2
+#define pin_LED_Status 8
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,8 +28,8 @@ boolean bUseEncoderButtons = false;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // pins to use in 4x4 keyboard
-const byte rowPins[ROWS] = {A1, 8, 9, 10};         //rows
-const byte colPins[COLS] = {A0, 4, 5, 6};          //columns
+const byte rowPins[ROWS] = {10, 16, 14, 15};         //rows
+const byte colPins[COLS] = {A0, A1, A2, A3};          //columns
 
 
 const byte index_LocalShiftKey = 3;                // index from 0 to 15 of the key that acts a 'shift' key. If -1 then no localShiftKey 
@@ -130,13 +132,13 @@ const char* const actions_LocalShift_labels[ROWS * COLS] = {
 //   Good Performance: only the first pin has interrupt capability
 //   Low Performance:  neither pin has interrupt capability
 /////
-Encoder myEnc0(1, 15);
-Encoder myEnc1(0, 14);
-Encoder myEnc2(7, 16);
+Encoder myEnc0(0, 5);
+Encoder myEnc1(1, 6);
+Encoder myEnc2(4, 7);
 //   avoid using pins with LEDs attached
 
 // Analog PIN for use with the three encoder buttons
-const byte ENCODER_BUTTONS_ANALOG_PIN = A3;
+const byte ENCODER_BUTTONS_ANALOG_PIN = A6;
 
 // Actions for rotary encoders
 const char actions1Encoders[N_ENCODERS][2] = { // Codes sent by the encoders (index [n][INX_ENCODER_UP]=UP or index [n][INX_ENCODER_DOWN]=DOWN)
@@ -279,9 +281,10 @@ const byte actionsMIDIEncodersUP[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_count] = {
 
 const byte actionsMIDIEncodersButtons[N_ENCODERS][MIDI_ACTIONS_STRUC_KEYS_count] = {   // Struct similar MIDI_ACTIONS_STRUC_KEYS
  {0, 0, 0, 108, 0, 127},
- {0, 0, 0, 109, 0, 127},
- {0, 0, 0, 110, 0, 127}
+ {0, 0, 0, 109, 0, 127}, 
+ {0, 0, 0, 45, 0, 64}                                                                  // 3th button is MIDIpedal too
 };
+
 
 
 

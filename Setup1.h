@@ -16,6 +16,7 @@ boolean bUseDisplay = true;          // PINs 2,3 are used by Wire library (SDA, 
 
 boolean bUseRotaryEncoders = true;
 boolean bUseEncoderButtons = true;
+boolean bCheckMIDIpedalIn4x4keysMode =false;
 
 
 #define pin_LED_Status A2
