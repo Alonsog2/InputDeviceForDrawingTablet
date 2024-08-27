@@ -133,6 +133,8 @@ void setup() {
 
   Keyboard.begin();
 
+  encoder_buttons.update();                              // just for clearing status
+
   Serial.println(F("EndSetup"));
 }
 
