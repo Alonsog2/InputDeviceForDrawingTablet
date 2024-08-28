@@ -37,9 +37,9 @@ const byte index_LocalShiftKey = 3;                // index from 0 to 15 of the 
 // Actions for 4x4 keyboard
 const char actions[ROWS * COLS][2] = {      // code sent when a key is pressed. if second value is other than 0 send it
   {'q', 0},            {'t', 0},             {KEY_LEFT_CTRL, 'd'},{'|', 0},
-  {KEY_TAB, 0},        {'s', 0},             {'r', 0},            {KEY_BACKSPACE, 0},
-  {KEY_LEFT_SHIFT, 0}, {'N', 0},             {'z', 0},            {KEY_LEFT_CTRL, ' '},
-  {KEY_LEFT_CTRL, 0},  {KEY_LEFT_CTRL, 'z'}, {'m', 0},   {' ',0}
+  {KEY_TAB, 0},        {'s', 0},             {'r', 0},            {KEY_LEFT_SHIFT, ' '},
+  {KEY_LEFT_SHIFT, 0}, {'2', 0},             {'5', 0},            {KEY_LEFT_CTRL, ' '},
+  {KEY_LEFT_CTRL, 0},  {KEY_LEFT_CTRL, 'z'}, {'m', 0},            {' ',0}
 };
 
 const char ACT_LABEL_1[] PROGMEM = "FreeHand\nSelectTmp.";
@@ -49,10 +49,10 @@ const char ACT_LABEL_4[] PROGMEM = "LocalShift";
 const char ACT_LABEL_5[] PROGMEM = "Only\ncanvas";
 const char ACT_LABEL_6[] PROGMEM = "Isolate\nlayer";
 const char ACT_LABEL_7[] PROGMEM = "Select\nlayer";
-const char ACT_LABEL_8[] PROGMEM = "BackSpace\nFillBbgCol";
+const char ACT_LABEL_8[] PROGMEM = "Rotate\n(Shift+SPC)";
 const char ACT_LABEL_9[] PROGMEM = "Shift\nResiz.Brsh";
-const char ACT_LABEL_10[] PROGMEM = "ShadeColor\nselector";
-const char ACT_LABEL_11[] PROGMEM = "Pie menu";
+const char ACT_LABEL_10[] PROGMEM = "Fit\npage";
+const char ACT_LABEL_11[] PROGMEM = "Reset\nrotation";
 const char ACT_LABEL_12[] PROGMEM = "Zoom\n(Ctrl+SPC)";
 const char ACT_LABEL_13[] PROGMEM = "Color pick\n(Ctrl)";
 const char ACT_LABEL_14[] PROGMEM = "Undo\n(Ctrl Z)";
