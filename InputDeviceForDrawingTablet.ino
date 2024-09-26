@@ -3,7 +3,7 @@
 */
 
 
-#define SETUP_TO_USE "Setup2.h"
+#define SETUP_TO_USE "Setup1.h"
 
 //#define INIT_IN_ TEST_MODE           // uncomment this line while testing the sketch, to prevent sending keystrokes to the computer
 

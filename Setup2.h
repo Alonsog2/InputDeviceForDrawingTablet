@@ -179,12 +179,12 @@ const char* const actionsEncoderDecr_labels[ROWS * COLS] = {
 const char actionsEncoder_Buttons[N_ENCODERS][2] = { // First key sent for each encoder_button. if other than 0, second key sent for each encoder_button
   {'5', 0},   // Reset rotation
   {'2', 0},   // Reset zoom (fit to page)
-  {'e', 0}    // Toggle eraser mode
+  {'b', 0}    // Select brush
 };
 
 const char ACT_ENC_BUTTON_LABEL_1[] PROGMEM = "Reset\nrotation";
 const char ACT_ENC_BUTTON_LABEL_2[] PROGMEM = "Reset\nzoom";
-const char ACT_ENC_BUTTON_LABEL_3[] PROGMEM = "Toggle\neraser";
+const char ACT_ENC_BUTTON_LABEL_3[] PROGMEM = "Select\nbrush";
 
 const char* const actionsEncoder_labels[ROWS * COLS] = {
     ACT_ENC_BUTTON_LABEL_1,
